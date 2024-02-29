@@ -3,44 +3,97 @@ package com.parsanasekhi.androidweatherapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.parsanasekhi.androidweatherapp.ui.screens.bookmark.BookmarkScreen
+import com.parsanasekhi.androidweatherapp.ui.screens.home.HomeScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.AndroidWeatherAppTheme
+import com.parsanasekhi.androidweatherapp.ui.theme.Transparent
+import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
+import com.parsanasekhi.androidweatherapp.ui.theme.White
+import com.parsanasekhi.androidweatherapp.ui.widgets.BottomWeatherAppBar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             AndroidWeatherAppTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    MainScreen()
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun MainScreen() {
+
+    val pagerState = rememberPagerState { 2 }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        Box(
+            modifier = Modifier.padding(it)
+        ) {
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(id = R.drawable.app_background),
+                contentDescription = "App Background",
+                contentScale = ContentScale.Crop
+            )
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
+                    if (page == 0) HomeScreen()
+                    else BookmarkScreen()
+                }
+                BottomWeatherAppBar()
+            }
+        }
+    }
 }
+
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    AndroidWeatherAppTheme {
-        Greeting("Android")
+private fun MainScreenPreview() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color.Gray
+    ) {
+        MainScreen()
     }
 }
