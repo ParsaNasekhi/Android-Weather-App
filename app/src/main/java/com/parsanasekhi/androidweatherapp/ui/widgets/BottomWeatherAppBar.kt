@@ -33,14 +33,14 @@ fun BottomWeatherAppBar(modifier: Modifier = Modifier) {
                 Icon(
                     imageVector = Icons.Filled.Home,
                     contentDescription = "Home Icon",
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(28.dp),
                     tint = White
                 )
             }
             IconButton(onClick = { /*TODO*/ }) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(28.dp),
                     contentDescription = "Bookmark Icon",
                     tint = TransparentWhite
                 )
