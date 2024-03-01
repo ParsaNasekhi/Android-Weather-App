@@ -11,6 +11,7 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,7 +20,12 @@ import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
 
 @Composable
-fun BottomWeatherAppBar(modifier: Modifier = Modifier) {
+fun BottomWeatherAppBar(
+    modifier: Modifier = Modifier,
+    page: MutableIntState,
+    onHomeClicked: () -> Unit,
+    onBookmarkClicked: () -> Unit,
+) {
     BottomAppBar(
         modifier = modifier,
         containerColor = Transparent
@@ -29,20 +35,26 @@ fun BottomWeatherAppBar(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                page.intValue = 0
+                onHomeClicked()
+            }) {
                 Icon(
                     imageVector = Icons.Filled.Home,
                     contentDescription = "Home Icon",
                     modifier = Modifier.size(28.dp),
-                    tint = White
+                    tint = if (page.intValue == 0) White else TransparentWhite
                 )
             }
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                page.intValue = 1
+                onBookmarkClicked()
+            }) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     modifier = Modifier.size(28.dp),
                     contentDescription = "Bookmark Icon",
-                    tint = TransparentWhite
+                    tint = if (page.intValue == 0) TransparentWhite else White
                 )
             }
         }

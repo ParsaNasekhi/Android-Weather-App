@@ -116,7 +116,7 @@ private fun MoreInfo(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun MoreInfoItem(
+private fun MoreInfoItem(
     text: String,
     modifier: Modifier = Modifier
 ) {
@@ -311,6 +311,8 @@ private fun HomeScreenPreview() {
         modifier = Modifier.fillMaxSize(),
         color = Color.Gray
     ) {
-        MainScreen()
+        MainScreen(pageCount = 1) {
+            HomeScreen()
+        }
     }
 }
