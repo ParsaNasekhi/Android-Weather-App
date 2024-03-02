@@ -24,6 +24,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,13 +34,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
 import com.parsanasekhi.androidweatherapp.ui.theme.Yellow
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    homeViewModel: HomeViewModel = hiltViewModel()
+) {
+
+    val currentWeather = homeViewModel.currentWeather.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,9 +60,9 @@ fun HomeScreen() {
                 .padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        HomePager(modifier = Modifier.fillMaxWidth())
+        HomePager(modifier = Modifier.fillMaxWidth(), currentWeather)
         WeekWeatherView(modifier = Modifier.fillMaxWidth())
-        MoreInfo(modifier = Modifier.fillMaxWidth())
+        MoreInfo(modifier = Modifier.fillMaxWidth(), currentWeather)
     }
 }
 
@@ -73,7 +82,7 @@ private fun SearchTextField(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MoreInfo(modifier: Modifier = Modifier) {
+private fun MoreInfo(modifier: Modifier = Modifier, currentWeather: State<CurrentWeather>) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.Center,
@@ -191,7 +200,7 @@ private fun WeekWeatherView(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HomePager(modifier: Modifier = Modifier) {
+private fun HomePager(modifier: Modifier = Modifier, currentWeather: State<CurrentWeather>) {
 
     val pagerState = rememberPagerState { 2 }
 
@@ -203,8 +212,8 @@ private fun HomePager(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth(),
             state = pagerState
         ) { page ->
-            if (page == 0) MainWeatherInfoView(modifier = Modifier.fillMaxWidth())
-            else MainWeatherInfoView()
+            if (page == 0) MainWeatherInfoView(modifier = Modifier.fillMaxWidth(), currentWeather)
+            else MainWeatherInfoView(currentWeather = currentWeather)
         }
         Spacer(modifier = Modifier.height(16.dp))
         Row(
@@ -231,20 +240,23 @@ private fun HomePager(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MainWeatherInfoView(modifier: Modifier = Modifier) {
+private fun MainWeatherInfoView(
+    modifier: Modifier = Modifier,
+    currentWeather: State<CurrentWeather>
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "New York",
+            text = currentWeather.value.name,
             color = White,
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "scattered clouds",
+            text = currentWeather.value.description,
             color = TransparentWhite,
             fontSize = 24.sp,
         )
@@ -256,7 +268,7 @@ private fun MainWeatherInfoView(modifier: Modifier = Modifier) {
             modifier = Modifier.size(100.dp)
         )
         Text(
-            text = "31",
+            text = currentWeather.value.temp,
             color = White,
             fontSize = 48.sp,
             fontWeight = FontWeight.Bold
@@ -274,7 +286,7 @@ private fun MainWeatherInfoView(modifier: Modifier = Modifier) {
                     fontSize = 16.sp,
                 )
                 Text(
-                    text = "31",
+                    text = currentWeather.value.maxTemp,
                     color = White,
                     fontSize = 16.sp,
                 )
@@ -295,7 +307,7 @@ private fun MainWeatherInfoView(modifier: Modifier = Modifier) {
                     fontSize = 16.sp,
                 )
                 Text(
-                    text = "30",
+                    text = currentWeather.value.minTemp,
                     color = White,
                     fontSize = 16.sp,
                 )
