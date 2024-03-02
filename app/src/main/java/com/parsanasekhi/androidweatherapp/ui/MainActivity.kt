@@ -1,4 +1,4 @@
-package com.parsanasekhi.androidweatherapp
+package com.parsanasekhi.androidweatherapp.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -31,13 +31,16 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.parsanasekhi.androidweatherapp.R
 import com.parsanasekhi.androidweatherapp.ui.screens.bookmark.BookmarkScreen
 import com.parsanasekhi.androidweatherapp.ui.screens.home.HomeScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.AndroidWeatherAppTheme
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentBlack
 import com.parsanasekhi.androidweatherapp.ui.widgets.BottomWeatherAppBar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
