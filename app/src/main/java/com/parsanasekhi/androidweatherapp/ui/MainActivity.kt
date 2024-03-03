@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import com.parsanasekhi.androidweatherapp.R
 import com.parsanasekhi.androidweatherapp.ui.screens.bookmark.BookmarkScreen
 import com.parsanasekhi.androidweatherapp.ui.screens.home.HomeScreen
@@ -108,6 +109,7 @@ fun MainScreen(
                         pagerContent(newPage)
                     }
                     BottomWeatherAppBar(
+                        modifier = Modifier.padding(bottom = 16.dp),
                         page = page,
                         onHomeClicked = {
                             scope.launch {

@@ -1,6 +1,6 @@
 package com.parsanasekhi.androidweatherapp.repository.current_weather
 
-import com.parsanasekhi.androidweatherapp.db.remote.CurrentWeatherResponse
+import com.parsanasekhi.androidweatherapp.db.remote.current_weather.CurrentWeatherResponse
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 

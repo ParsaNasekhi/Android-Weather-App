@@ -1,7 +1,7 @@
 package com.parsanasekhi.androidweatherapp.repository.current_weather
 
-import com.parsanasekhi.androidweatherapp.db.remote.CurrentWeatherResponse
-import com.parsanasekhi.androidweatherapp.db.remote.WeatherApiService
+import com.parsanasekhi.androidweatherapp.db.remote.current_weather.CurrentWeatherResponse
+import com.parsanasekhi.androidweatherapp.db.remote.current_weather.WeatherApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

@@ -1,6 +1,6 @@
 package com.parsanasekhi.androidweatherapp.di
 
-import com.parsanasekhi.androidweatherapp.db.remote.WeatherApiService
+import com.parsanasekhi.androidweatherapp.db.remote.current_weather.WeatherApiService
 import com.parsanasekhi.androidweatherapp.repository.current_weather.CurrentWeatherRepository
 import com.parsanasekhi.androidweatherapp.repository.current_weather.CurrentWeatherRepositoryImpl
 import dagger.Module

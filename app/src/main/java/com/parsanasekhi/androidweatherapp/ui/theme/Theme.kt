@@ -47,7 +47,7 @@ private val LightColorScheme = lightColorScheme(
 fun AndroidWeatherAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -63,10 +63,11 @@ fun AndroidWeatherAppTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
+            WindowCompat.setDecorFitsSystemWindows(window, false)
             window.statusBarColor = Transparent.toArgb()
             window.navigationBarColor = TransparentBlack.toArgb()
             ViewCompat.setOnApplyWindowInsetsListener(view) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
                 view.updatePadding(insets.left, insets.top, insets.right, insets.bottom)
                 WindowInsetsCompat.CONSUMED
             }
