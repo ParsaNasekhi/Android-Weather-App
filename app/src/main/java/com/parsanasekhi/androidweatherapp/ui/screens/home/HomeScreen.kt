@@ -1,5 +1,6 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.home
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,7 +49,13 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
+//    val cityLocation = homeViewModel.cityLocation.collectAsState()
     val currentWeather = homeViewModel.currentWeather.collectAsState()
+    Log.i("TestLog", "HomeScreen: ${currentWeather.value}")
+
+    val cityName = remember {
+        mutableStateOf("")
+    }
 
     Column(
         modifier = Modifier
@@ -57,8 +66,15 @@ fun HomeScreen(
         SearchTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        )
+                .padding(horizontal = 16.dp),
+            text = cityName
+        ) { newText ->
+            cityName.value = newText
+            Log.i("TestLog", "HomeScreen: $newText, ${currentWeather.value.name}")
+            homeViewModel.getCurrentWeatherFromCityName(cityName.value)
+//            homeViewModel.getLocationFromCityName(newText)
+//            homeViewModel.getCurrentWeather(cityLocation.value)
+        }
         Spacer(modifier = Modifier.height(16.dp))
         HomePager(modifier = Modifier.fillMaxWidth(), currentWeather)
         WeekWeatherView(modifier = Modifier.fillMaxWidth())
@@ -67,11 +83,17 @@ fun HomeScreen(
 }
 
 @Composable
-private fun SearchTextField(modifier: Modifier = Modifier) {
+private fun SearchTextField(
+    modifier: Modifier = Modifier,
+    text: State<String>,
+    onSearch: (String) -> Unit
+) {
     OutlinedTextField(
         modifier = modifier,
-        value = "",
-        onValueChange = {},
+        value = text.value,
+        onValueChange = { newValue ->
+            onSearch(newValue)
+        },
         label = {
             Text(
                 text = "Enter a city name",
