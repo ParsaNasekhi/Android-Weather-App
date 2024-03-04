@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -72,7 +73,7 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(16.dp))
         HomePager(modifier = Modifier.fillMaxWidth(), currentWeather)
         WeekWeatherView(modifier = Modifier.fillMaxWidth())
-        MoreInfo(modifier = Modifier.fillMaxWidth(), currentWeather)
+        MoreInfo(modifier = Modifier.fillMaxWidth(), currentWeather, homeViewModel)
     }
 }
 
@@ -93,12 +94,23 @@ private fun SearchTextField(
                 text = "Enter a city name",
                 color = TransparentWhite
             )
-        }
+        },
+        maxLines = 1,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Yellow,
+            focusedTextColor = White,
+            disabledBorderColor = TransparentWhite,
+            disabledTextColor = TransparentWhite
+        ),
     )
 }
 
 @Composable
-private fun MoreInfo(modifier: Modifier = Modifier, currentWeather: State<CurrentWeather>) {
+private fun MoreInfo(
+    modifier: Modifier = Modifier,
+    currentWeather: State<CurrentWeather>,
+    homeViewModel: HomeViewModel
+) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.Center,
@@ -106,7 +118,7 @@ private fun MoreInfo(modifier: Modifier = Modifier, currentWeather: State<Curren
     ) {
         MoreInfoItem(
             title = "wind",
-            value = "${currentWeather.value.windSpeed}m/s"
+            value = "${currentWeather.value.windSpeed} m/s"
         )
         Spacer(
             modifier = Modifier
@@ -128,7 +140,9 @@ private fun MoreInfo(modifier: Modifier = Modifier, currentWeather: State<Curren
         )
         MoreInfoItem(
             title = "sunrise",
-            value = currentWeather.value.sunrise
+            value = if (currentWeather.value.sunrise.isNotEmpty()) homeViewModel.formatTime(
+                currentWeather.value.sunrise
+            ) else ""
         )
         Spacer(
             modifier = Modifier
@@ -139,7 +153,9 @@ private fun MoreInfo(modifier: Modifier = Modifier, currentWeather: State<Curren
         )
         MoreInfoItem(
             title = "sunset",
-            value = currentWeather.value.sunset
+            value = if (currentWeather.value.sunset.isNotEmpty()) homeViewModel.formatTime(
+                currentWeather.value.sunset
+            ) else ""
         )
     }
 }

@@ -9,6 +9,7 @@ import com.parsanasekhi.androidweatherapp.repository.current_weather.CurrentWeat
 import com.parsanasekhi.androidweatherapp.repository.geocoding.GeocodingRepository
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
 import com.parsanasekhi.androidweatherapp.utills.LoadState
+import com.parsanasekhi.androidweatherapp.utills.convertUnixToAmPm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -72,6 +73,10 @@ class HomeViewModel @Inject constructor(
                 _currentWeather.value = response
             }
         }
+    }
+
+    fun formatTime(unixTime: String): String {
+        return convertUnixToAmPm(unixTime)
     }
 
 }
