@@ -1,6 +1,5 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.home
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,9 +48,7 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
-//    val cityLocation = homeViewModel.cityLocation.collectAsState()
     val currentWeather = homeViewModel.currentWeather.collectAsState()
-    Log.i("TestLog", "HomeScreen: ${currentWeather.value}")
 
     val cityName = remember {
         mutableStateOf("")
@@ -70,10 +67,7 @@ fun HomeScreen(
             text = cityName
         ) { newText ->
             cityName.value = newText
-            Log.i("TestLog", "HomeScreen: $newText, ${currentWeather.value.name}")
-            homeViewModel.getCurrentWeatherFromCityName(cityName.value)
-//            homeViewModel.getLocationFromCityName(newText)
-//            homeViewModel.getCurrentWeather(cityLocation.value)
+            homeViewModel.getCurrentWeather(cityName.value)
         }
         Spacer(modifier = Modifier.height(16.dp))
         HomePager(modifier = Modifier.fillMaxWidth(), currentWeather)
@@ -111,7 +105,8 @@ private fun MoreInfo(modifier: Modifier = Modifier, currentWeather: State<Curren
         verticalAlignment = Alignment.CenterVertically
     ) {
         MoreInfoItem(
-            text = "6:29 AM"
+            title = "wind",
+            value = "${currentWeather.value.windSpeed}m/s"
         )
         Spacer(
             modifier = Modifier
@@ -121,7 +116,8 @@ private fun MoreInfo(modifier: Modifier = Modifier, currentWeather: State<Curren
                 .background(color = TransparentWhite)
         )
         MoreInfoItem(
-            text = "6:29 AM"
+            title = "humidity",
+            value = "${currentWeather.value.humidity}%"
         )
         Spacer(
             modifier = Modifier
@@ -131,7 +127,8 @@ private fun MoreInfo(modifier: Modifier = Modifier, currentWeather: State<Curren
                 .background(color = TransparentWhite)
         )
         MoreInfoItem(
-            text = "6:29 AM"
+            title = "sunrise",
+            value = currentWeather.value.sunrise
         )
         Spacer(
             modifier = Modifier
@@ -141,14 +138,16 @@ private fun MoreInfo(modifier: Modifier = Modifier, currentWeather: State<Curren
                 .background(color = TransparentWhite)
         )
         MoreInfoItem(
-            text = "6:29 AM"
+            title = "sunset",
+            value = currentWeather.value.sunset
         )
     }
 }
 
 @Composable
 private fun MoreInfoItem(
-    text: String,
+    title: String,
+    value: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -157,13 +156,13 @@ private fun MoreInfoItem(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "sunrise",
+            text = title,
             color = Yellow,
             fontSize = 16.sp,
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = text,
+            text = value,
             color = White,
             fontSize = 16.sp,
         )

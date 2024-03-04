@@ -8,7 +8,6 @@ import com.parsanasekhi.androidweatherapp.data.Location
 import com.parsanasekhi.androidweatherapp.repository.current_weather.CurrentWeatherRepository
 import com.parsanasekhi.androidweatherapp.repository.geocoding.GeocodingRepository
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
-import com.parsanasekhi.androidweatherapp.utills.EmptyLocation
 import com.parsanasekhi.androidweatherapp.utills.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -31,75 +31,47 @@ class HomeViewModel @Inject constructor(
     private val _currentWeatherLoadState = MutableStateFlow(LoadState.LOADING)
     val currentWeatherLoadState = _currentWeatherLoadState.asStateFlow()
 
-    private val _cityLocation = MutableStateFlow(EmptyLocation)
+    init {
+        getCurrentWeather("Mashhad")
+    }
 
-    //    val cityLocation = _cityLocation.asStateFlow()
-    private val _cityLocationLoadState = MutableStateFlow(LoadState.LOADING)
-    val cityLocationLoadState = _cityLocationLoadState.asStateFlow()
-
-    fun getCurrentWeatherFromCityName(cityName: String) {
+    fun getCurrentWeather(cityName: String) {
         viewModelScope.launch {
-            getLocationFromCityName(cityName)
-            getCurrentWeather(_cityLocation.value)
-        }
-    }
-
-    private suspend fun getCurrentWeather(location: Location) {
-        currentWeatherRepository.getCurrentWeather(
-            lat = location.lat,
-            lon = location.lon
-        ).onStart {
-            _currentWeatherLoadState.value = LoadState.LOADING
-        }.catch { throwable ->
-            _currentWeatherLoadState.value = LoadState.ERROR
-            Log.w("ManualLog", "getCurrentWeather: ${throwable.message}")
-        }.filter { response ->
-            if (!response.isSuccessful)
+            currentWeatherRepository.getCurrentWeather(
+                cityName = cityName
+            ).onStart {
+                _currentWeatherLoadState.value = LoadState.LOADING
+            }.catch { throwable ->
                 _currentWeatherLoadState.value = LoadState.ERROR
-            response.isSuccessful
-        }.map { response ->
-            CurrentWeather(
-                name = response.body()!!.name,
-                location = Location(
-                    lat = response.body()!!.coord.lat.toString(),
-                    lon = response.body()!!.coord.lon.toString()
-                ),
-                icon = response.body()!!.weather[0].icon,
-                description = response.body()!!.weather[0].description,
-                temp = response.body()!!.main.temp.toString(),
-                minTemp = response.body()!!.main.tempMin.toString(),
-                maxTemp = response.body()!!.main.tempMax.toString(),
-                humidity = response.body()!!.main.humidity.toString(),
-                id = response.body()!!.id.toString(),
-                sunset = response.body()!!.sys.sunset.toString(),
-                sunrise = response.body()!!.sys.sunrise.toString(),
-                windSpeed = response.body()!!.wind.speed.toString()
-            )
-        }.collect { response ->
-            _currentWeatherLoadState.value = LoadState.SUCCESS
-            _currentWeather.value = response
-        }
-    }
-
-    private suspend fun getLocationFromCityName(cityName: String) {
-        geocodingRepository.getLocation(cityName)
-            .onStart {
-                _cityLocationLoadState.value = LoadState.LOADING
-            }.catch {
-                _cityLocationLoadState.value = LoadState.ERROR
+                Log.w("ManualLog", "getCurrentWeather: ${throwable.message}")
             }.filter { response ->
+                Log.i("TestLog", "getCurrentWeather: ${response.body()}")
                 if (!response.isSuccessful)
-                    _cityLocationLoadState.value = LoadState.ERROR
-                response.isSuccessful && response.body()!!.size > 0 && response.body()!![0].localNames?.en == cityName
+                    _currentWeatherLoadState.value = LoadState.ERROR
+                response.isSuccessful
             }.map { response ->
-                Location(
-                    lat = response.body()!![0].lat.toString(),
-                    lon = response.body()!![0].lon.toString()
+                CurrentWeather(
+                    name = response.body()!!.name,
+                    location = Location(
+                        lat = response.body()!!.coord.lat.toString(),
+                        lon = response.body()!!.coord.lon.toString()
+                    ),
+                    icon = response.body()!!.weather[0].icon,
+                    description = response.body()!!.weather[0].description,
+                    temp = (response.body()!!.main.temp - 273.15).roundToInt().toString(),
+                    minTemp = (response.body()!!.main.tempMin - 273.15).roundToInt().toString(),
+                    maxTemp = (response.body()!!.main.tempMax - 273.15).roundToInt().toString(),
+                    humidity = response.body()!!.main.humidity.toString(),
+                    id = response.body()!!.id.toString(),
+                    sunset = response.body()!!.sys.sunset.toString(),
+                    sunrise = response.body()!!.sys.sunrise.toString(),
+                    windSpeed = response.body()!!.wind.speed.toString()
                 )
-            }.collect { location ->
-                _cityLocation.value = location
-                _cityLocationLoadState.value = LoadState.SUCCESS
+            }.collect { response ->
+                _currentWeatherLoadState.value = LoadState.SUCCESS
+                _currentWeather.value = response
             }
+        }
     }
 
 }

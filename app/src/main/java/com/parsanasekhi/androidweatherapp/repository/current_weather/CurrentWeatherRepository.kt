@@ -7,8 +7,7 @@ import retrofit2.Response
 interface CurrentWeatherRepository {
 
     suspend fun getCurrentWeather(
-        lat: String,
-        lon: String
+        cityName: String
     ): Flow<Response<CurrentWeatherResponse>>
 
 }

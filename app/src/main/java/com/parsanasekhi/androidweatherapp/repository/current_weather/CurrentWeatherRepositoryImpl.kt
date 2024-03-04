@@ -12,9 +12,8 @@ import javax.inject.Inject
 class CurrentWeatherRepositoryImpl @Inject constructor(private val weatherApiService: WeatherApiService) :
     CurrentWeatherRepository {
     override suspend fun getCurrentWeather(
-        lat: String,
-        lon: String
+        cityName: String
     ): Flow<Response<CurrentWeatherResponse>> = flow {
-        emit(weatherApiService.getCurrentWeather(lat, lon))
+        emit(weatherApiService.getCurrentWeather(cityName))
     }.flowOn(Dispatchers.IO)
 }
