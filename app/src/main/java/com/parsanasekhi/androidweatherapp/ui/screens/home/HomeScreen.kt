@@ -1,5 +1,6 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.home
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,12 +34,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.bumptech.glide.Glide
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
+import com.parsanasekhi.androidweatherapp.db.remote.ApiUrl
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
@@ -276,6 +282,7 @@ private fun HomePager(modifier: Modifier = Modifier, currentWeather: State<Curre
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun MainWeatherInfoView(
     modifier: Modifier = Modifier,
@@ -298,12 +305,20 @@ private fun MainWeatherInfoView(
             fontSize = 24.sp,
         )
         Spacer(modifier = Modifier.height(14.dp))
-        Icon(
-            imageVector = Icons.Outlined.Info,
-            contentDescription = "Weather Icon",
-            tint = TransparentWhite,
-            modifier = Modifier.size(100.dp)
-        )
+        Log.i("TestLog", "MainWeatherInfoView: ${"${ApiUrl.LoadImageUrl}${currentWeather.value.icon}.png"}")
+        if (currentWeather.value.icon.isNotEmpty())
+            GlideImage(
+                model = "${ApiUrl.LoadImageUrl}${currentWeather.value.icon}.png",
+                contentDescription = "Weather Icon",
+                modifier = Modifier.size(100.dp),
+            )
+        else
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = "Weather Icon",
+                tint = TransparentWhite,
+                modifier = Modifier.size(100.dp)
+            )
         Text(
             text = currentWeather.value.temp,
             color = White,

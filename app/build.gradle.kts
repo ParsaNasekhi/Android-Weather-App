@@ -80,6 +80,9 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.49")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
+    // glide:
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+
 //    implementation("androidx.constraintlayout:constraintlayout:2.2.0-alpha13")
 //    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha13")
 }

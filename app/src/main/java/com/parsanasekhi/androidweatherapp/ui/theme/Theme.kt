@@ -2,7 +2,6 @@ package com.parsanasekhi.androidweatherapp.ui.theme
 
 import android.app.Activity
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -45,7 +44,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun AndroidWeatherAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
@@ -67,11 +66,12 @@ fun AndroidWeatherAppTheme(
             window.statusBarColor = Transparent.toArgb()
             window.navigationBarColor = TransparentBlack.toArgb()
             ViewCompat.setOnApplyWindowInsetsListener(view) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
                 view.updatePadding(insets.left, insets.top, insets.right, insets.bottom)
                 WindowInsetsCompat.CONSUMED
             }
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
         }
     }
 
