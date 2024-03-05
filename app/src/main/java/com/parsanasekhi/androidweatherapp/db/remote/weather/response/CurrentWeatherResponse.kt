@@ -1,4 +1,4 @@
-package com.parsanasekhi.androidweatherapp.db.remote.current_weather
+package com.parsanasekhi.androidweatherapp.db.remote.weather.response
 
 
 import com.google.gson.annotations.SerializedName

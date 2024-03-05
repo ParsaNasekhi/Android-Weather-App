@@ -1,7 +1,7 @@
 package com.parsanasekhi.androidweatherapp.di
 
 import com.parsanasekhi.androidweatherapp.db.remote.ApiUrl
-import com.parsanasekhi.androidweatherapp.db.remote.current_weather.WeatherApiService
+import com.parsanasekhi.androidweatherapp.db.remote.weather.WeatherApiService
 import com.parsanasekhi.androidweatherapp.db.remote.geocoding.GeocodingApiService
 import dagger.Module
 import dagger.Provides

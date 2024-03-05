@@ -5,4 +5,5 @@ object ApiUrl {
     const val LoadImageUrl = "https://openweathermap.org/img/wn/"
     const val CurrentWeather = "data/2.5/weather"
     const val Geocoding = "geo/1.0/direct"
+    const val ForecastWeather = "data/2.5/forecast"
 }

@@ -1,9 +1,9 @@
 package com.parsanasekhi.androidweatherapp.di
 
-import com.parsanasekhi.androidweatherapp.db.remote.current_weather.WeatherApiService
+import com.parsanasekhi.androidweatherapp.db.remote.weather.WeatherApiService
 import com.parsanasekhi.androidweatherapp.db.remote.geocoding.GeocodingApiService
-import com.parsanasekhi.androidweatherapp.repository.current_weather.CurrentWeatherRepository
-import com.parsanasekhi.androidweatherapp.repository.current_weather.CurrentWeatherRepositoryImpl
+import com.parsanasekhi.androidweatherapp.repository.weather.WeatherRepository
+import com.parsanasekhi.androidweatherapp.repository.weather.WeatherRepositoryImpl
 import com.parsanasekhi.androidweatherapp.repository.geocoding.GeocodingRepository
 import com.parsanasekhi.androidweatherapp.repository.geocoding.GeocodingRepositoryImpl
 import dagger.Module
@@ -18,8 +18,8 @@ object LocalModule {
 
     @Provides
     @Singleton
-    fun provideCurrentWeatherRepository(weatherApiService: WeatherApiService): CurrentWeatherRepository {
-        return CurrentWeatherRepositoryImpl(weatherApiService)
+    fun provideCurrentWeatherRepository(weatherApiService: WeatherApiService): WeatherRepository {
+        return WeatherRepositoryImpl(weatherApiService)
     }
 
     @Provides

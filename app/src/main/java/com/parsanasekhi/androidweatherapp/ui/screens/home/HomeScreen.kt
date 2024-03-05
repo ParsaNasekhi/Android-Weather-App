@@ -3,6 +3,7 @@ package com.parsanasekhi.androidweatherapp.ui.screens.home
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -34,16 +36,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
+import com.parsanasekhi.androidweatherapp.data.ForecastWeather
 import com.parsanasekhi.androidweatherapp.db.remote.ApiUrl
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
@@ -56,6 +57,7 @@ fun HomeScreen(
 ) {
 
     val currentWeather = homeViewModel.currentWeather.collectAsState()
+    val forecastWeather = homeViewModel.forecastWeather.collectAsState()
 
     val cityName = remember {
         mutableStateOf("")
@@ -70,24 +72,22 @@ fun HomeScreen(
         SearchTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            text = cityName
+                .padding(horizontal = 16.dp), text = cityName
         ) { newText ->
             cityName.value = newText
             homeViewModel.getCurrentWeather(cityName.value)
+            homeViewModel.getForecastWeather(cityName.value, "5")
         }
         Spacer(modifier = Modifier.height(16.dp))
         HomePager(modifier = Modifier.fillMaxWidth(), currentWeather)
-        WeekWeatherView(modifier = Modifier.fillMaxWidth())
+        WeekWeatherView(modifier = Modifier.fillMaxWidth(), forecastWeather)
         MoreInfo(modifier = Modifier.fillMaxWidth(), currentWeather, homeViewModel)
     }
 }
 
 @Composable
 private fun SearchTextField(
-    modifier: Modifier = Modifier,
-    text: State<String>,
-    onSearch: (String) -> Unit
+    modifier: Modifier = Modifier, text: State<String>, onSearch: (String) -> Unit
 ) {
     OutlinedTextField(
         modifier = modifier,
@@ -97,8 +97,7 @@ private fun SearchTextField(
         },
         label = {
             Text(
-                text = "Enter a city name",
-                color = TransparentWhite
+                text = "Enter a city name", color = TransparentWhite
             )
         },
         maxLines = 1,
@@ -123,8 +122,7 @@ private fun MoreInfo(
         verticalAlignment = Alignment.CenterVertically
     ) {
         MoreInfoItem(
-            title = "wind",
-            value = "${currentWeather.value.windSpeed} m/s"
+            title = "wind", value = currentWeather.value.windSpeed
         )
         Spacer(
             modifier = Modifier
@@ -134,8 +132,7 @@ private fun MoreInfo(
                 .background(color = TransparentWhite)
         )
         MoreInfoItem(
-            title = "humidity",
-            value = "${currentWeather.value.humidity}%"
+            title = "humidity", value = currentWeather.value.humidity
         )
         Spacer(
             modifier = Modifier
@@ -144,12 +141,7 @@ private fun MoreInfo(
                 .width(1.dp)
                 .background(color = TransparentWhite)
         )
-        MoreInfoItem(
-            title = "sunrise",
-            value = if (currentWeather.value.sunrise.isNotEmpty()) homeViewModel.formatTime(
-                currentWeather.value.sunrise
-            ) else ""
-        )
+        MoreInfoItem(title = "sunrise", value = currentWeather.value.sunrise.ifEmpty { "" })
         Spacer(
             modifier = Modifier
                 .padding(horizontal = 8.dp)
@@ -157,20 +149,13 @@ private fun MoreInfo(
                 .width(1.dp)
                 .background(color = TransparentWhite)
         )
-        MoreInfoItem(
-            title = "sunset",
-            value = if (currentWeather.value.sunset.isNotEmpty()) homeViewModel.formatTime(
-                currentWeather.value.sunset
-            ) else ""
-        )
+        MoreInfoItem(title = "sunset", value = currentWeather.value.sunset.ifEmpty { "" })
     }
 }
 
 @Composable
 private fun MoreInfoItem(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier
+    title: String, value: String, modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
@@ -191,8 +176,11 @@ private fun MoreInfoItem(
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-private fun WeekWeatherView(modifier: Modifier = Modifier) {
+private fun WeekWeatherView(
+    modifier: Modifier = Modifier, forecastWeather: State<List<ForecastWeather.Detail>>
+) {
     Column(
         modifier = modifier
     ) {
@@ -205,26 +193,43 @@ private fun WeekWeatherView(modifier: Modifier = Modifier) {
         )
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 4.dp)
         ) {
-            repeat(6) {
+            Log.i("TestLog", "WeekWeatherView: ${forecastWeather.value}")
+            repeat(forecastWeather.value.size) { dayNum ->
                 Column(
+                    modifier = Modifier.padding(horizontal = 4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Aug 23",
+                        text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].date else "",
+                        color = White,
+                        fontSize = 12.sp,
+                    )
+                    Text(
+                        text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].time else "",
                         color = TransparentWhite,
                         fontSize = 12.sp,
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = "Weather Icon",
-                        tint = White,
-                        modifier = Modifier.size(48.dp)
-                    )
+                    if (forecastWeather.value[dayNum].icon.isNotEmpty())
+                        GlideImage(
+                            model = "${ApiUrl.LoadImageUrl}${forecastWeather.value[dayNum].icon}.png",
+                            contentDescription = "Forecast Weather Icon",
+                            modifier = Modifier.size(48.dp),
+                        )
+                    else
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = "Weather Icon",
+                            tint = White,
+                            modifier = Modifier.size(48.dp)
+                        )
                     Text(
-                        text = "31",
+                        text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].temp else "",
                         color = White,
                         fontSize = 16.sp,
                     )
@@ -248,12 +253,10 @@ private fun HomePager(modifier: Modifier = Modifier, currentWeather: State<Curre
     val pagerState = rememberPagerState { 2 }
 
     Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally
     ) {
         HorizontalPager(
-            modifier = Modifier.fillMaxWidth(),
-            state = pagerState
+            modifier = Modifier.fillMaxWidth(), state = pagerState
         ) { page ->
             if (page == 0) MainWeatherInfoView(modifier = Modifier.fillMaxWidth(), currentWeather)
             else MainWeatherInfoView(currentWeather = currentWeather)
@@ -285,12 +288,10 @@ private fun HomePager(modifier: Modifier = Modifier, currentWeather: State<Curre
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun MainWeatherInfoView(
-    modifier: Modifier = Modifier,
-    currentWeather: State<CurrentWeather>
+    modifier: Modifier = Modifier, currentWeather: State<CurrentWeather>
 ) {
     Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = currentWeather.value.name,
@@ -305,20 +306,18 @@ private fun MainWeatherInfoView(
             fontSize = 24.sp,
         )
         Spacer(modifier = Modifier.height(14.dp))
-        Log.i("TestLog", "MainWeatherInfoView: ${"${ApiUrl.LoadImageUrl}${currentWeather.value.icon}.png"}")
         if (currentWeather.value.icon.isNotEmpty())
             GlideImage(
                 model = "${ApiUrl.LoadImageUrl}${currentWeather.value.icon}.png",
-                contentDescription = "Weather Icon",
+                contentDescription = "Current Weather Icon",
                 modifier = Modifier.size(100.dp),
             )
-        else
-            Icon(
-                imageVector = Icons.Outlined.Info,
-                contentDescription = "Weather Icon",
-                tint = TransparentWhite,
-                modifier = Modifier.size(100.dp)
-            )
+        else Icon(
+            imageVector = Icons.Outlined.Info,
+            contentDescription = "Weather Icon",
+            tint = TransparentWhite,
+            modifier = Modifier.size(100.dp)
+        )
         Text(
             text = currentWeather.value.temp,
             color = White,
@@ -372,8 +371,7 @@ private fun MainWeatherInfoView(
 @Composable
 private fun HomeScreenPreview() {
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.Gray
+        modifier = Modifier.fillMaxSize(), color = Color.Gray
     ) {
         MainScreen(pageCount = 1) {
             HomeScreen()
