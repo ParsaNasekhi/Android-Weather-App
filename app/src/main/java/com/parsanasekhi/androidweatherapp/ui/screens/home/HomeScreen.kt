@@ -1,6 +1,8 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.home
 
-import android.util.Log
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -72,7 +74,7 @@ fun HomeScreen(
             .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SearchTextField(
+        SearchCityView(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp), text = cityName
@@ -82,14 +84,14 @@ fun HomeScreen(
             homeViewModel.getForecastWeather(cityName.value, "5")
         }
         Spacer(modifier = Modifier.height(16.dp))
-        HomePager(modifier = Modifier.fillMaxWidth(), currentWeather)
-        WeekWeatherView(modifier = Modifier.fillMaxWidth(), forecastWeather)
-        MoreInfo(modifier = Modifier.fillMaxWidth(), currentWeather, homeViewModel)
+        HomePagerView(modifier = Modifier.fillMaxWidth(), currentWeather)
+        ForecastWeatherView(modifier = Modifier.fillMaxWidth(), forecastWeather)
+        MoreInfoView(modifier = Modifier.fillMaxWidth(), currentWeather, homeViewModel)
     }
 }
 
 @Composable
-private fun SearchTextField(
+private fun SearchCityView(
     modifier: Modifier = Modifier, text: State<String>, onSearch: (String) -> Unit
 ) {
     OutlinedTextField(
@@ -114,7 +116,7 @@ private fun SearchTextField(
 }
 
 @Composable
-private fun MoreInfo(
+private fun MoreInfoView(
     modifier: Modifier = Modifier,
     currentWeather: State<CurrentWeather>,
     homeViewModel: HomeViewModel
@@ -181,7 +183,7 @@ private fun MoreInfoItem(
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-private fun WeekWeatherView(
+private fun ForecastWeatherView(
     modifier: Modifier = Modifier, forecastWeather: State<List<ForecastWeather.Detail>>
 ) {
 
@@ -205,7 +207,7 @@ private fun WeekWeatherView(
                 .width(screenWidth.dp),
             contentPadding = PaddingValues(8.dp)
         ) {
-                items(forecastWeather.value.size) { dayNum ->
+            items(forecastWeather.value.size) { dayNum ->
                 Column(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -228,7 +230,7 @@ private fun WeekWeatherView(
                             modifier = Modifier.size(48.dp),
                         )
                     else
-                    Icon(
+                        Icon(
                             imageVector = Icons.Outlined.Info,
                             contentDescription = "Weather Icon",
                             tint = White,
@@ -254,7 +256,7 @@ private fun WeekWeatherView(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HomePager(modifier: Modifier = Modifier, currentWeather: State<CurrentWeather>) {
+private fun HomePagerView(modifier: Modifier = Modifier, currentWeather: State<CurrentWeather>) {
 
     val pagerState = rememberPagerState { 2 }
 
@@ -264,8 +266,8 @@ private fun HomePager(modifier: Modifier = Modifier, currentWeather: State<Curre
         HorizontalPager(
             modifier = Modifier.fillMaxWidth(), state = pagerState
         ) { page ->
-            if (page == 0) MainWeatherInfoView(modifier = Modifier.fillMaxWidth(), currentWeather)
-            else MainWeatherInfoView(currentWeather = currentWeather)
+            if (page == 0) CurrentWeatherView(modifier = Modifier.fillMaxWidth(), currentWeather)
+            else CurrentWeatherView(currentWeather = currentWeather)
         }
         Spacer(modifier = Modifier.height(16.dp))
         Row(
@@ -276,15 +278,28 @@ private fun HomePager(modifier: Modifier = Modifier, currentWeather: State<Curre
             horizontalArrangement = Arrangement.Center
         ) {
             repeat(pagerState.pageCount) { iteration ->
-                val color = if (pagerState.currentPage == iteration) White else TransparentWhite
-                val width = if (pagerState.currentPage == iteration) 32.dp else 16.dp
+                val isInThisPage = pagerState.currentPage == iteration
+                val color = if (isInThisPage) White else TransparentWhite
+                val width = if (isInThisPage) 32.dp else 16.dp
                 Box(
                     modifier = Modifier
                         .padding(2.dp)
                         .clip(CircleShape)
-                        .background(color)
+                        .background(
+                            animateColorAsState(
+                                targetValue = color,
+                                animationSpec = tween(durationMillis = 500),
+                                label = "Home Pager Indicator Color Animation"
+                            ).value
+                        )
                         .height(8.dp)
-                        .width(width)
+                        .width(
+                            animateDpAsState(
+                                targetValue = width,
+                                animationSpec = tween(durationMillis = 500),
+                                label = "Home Pager Indicator Width Animation"
+                            ).value
+                        )
                 )
             }
         }
@@ -293,7 +308,7 @@ private fun HomePager(modifier: Modifier = Modifier, currentWeather: State<Curre
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-private fun MainWeatherInfoView(
+private fun CurrentWeatherView(
     modifier: Modifier = Modifier, currentWeather: State<CurrentWeather>
 ) {
     Column(
