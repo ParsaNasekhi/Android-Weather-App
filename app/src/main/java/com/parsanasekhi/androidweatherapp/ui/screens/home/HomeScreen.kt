@@ -7,6 +7,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -36,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -181,6 +184,10 @@ private fun MoreInfoItem(
 private fun WeekWeatherView(
     modifier: Modifier = Modifier, forecastWeather: State<List<ForecastWeather.Detail>>
 ) {
+
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = modifier
     ) {
@@ -191,17 +198,16 @@ private fun WeekWeatherView(
                 .height(1.dp)
                 .background(color = TransparentWhite)
         )
-        Row(
+        LazyRow(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 4.dp)
+                .horizontalScroll(scrollState)
+                .width(screenWidth.dp),
+            contentPadding = PaddingValues(8.dp)
         ) {
-            Log.i("TestLog", "WeekWeatherView: ${forecastWeather.value}")
-            repeat(forecastWeather.value.size) { dayNum ->
+                items(forecastWeather.value.size) { dayNum ->
                 Column(
-                    modifier = Modifier.padding(horizontal = 4.dp),
+                    modifier = Modifier.padding(horizontal = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -222,7 +228,7 @@ private fun WeekWeatherView(
                             modifier = Modifier.size(48.dp),
                         )
                     else
-                        Icon(
+                    Icon(
                             imageVector = Icons.Outlined.Info,
                             contentDescription = "Weather Icon",
                             tint = White,

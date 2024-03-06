@@ -63,7 +63,7 @@ class HomeViewModel @Inject constructor(
                     response.body()!!.list.forEach {
                         forecastWeather.add(
                             ForecastWeather.Detail(
-                                temp = (it.main.temp - 273.15).roundToInt().toString(),
+                                temp = "${(it.main.temp - 273.15).roundToInt()}°C",
                                 date = formatUnixTime(it.dt.toString(), "MMM dd"),
                                 time = formatUnixTime(it.dt.toString(), "hh:mm a"),
                                 icon = it.weather[0].icon
@@ -102,9 +102,9 @@ class HomeViewModel @Inject constructor(
                     ),
                     icon = response.body()!!.weather[0].icon,
                     description = response.body()!!.weather[0].description,
-                    temp = (response.body()!!.main.temp - 273.15).roundToInt().toString(),
-                    minTemp = (response.body()!!.main.tempMin - 273.15).roundToInt().toString(),
-                    maxTemp = (response.body()!!.main.tempMax - 273.15).roundToInt().toString(),
+                    temp = "${(response.body()!!.main.temp - 273.15).roundToInt()}°C",
+                    minTemp = "${(response.body()!!.main.tempMin - 273.15).roundToInt()}°C",
+                    maxTemp = "${(response.body()!!.main.tempMax - 273.15).roundToInt()}°C",
                     humidity = "${response.body()!!.main.humidity}%",
                     id = response.body()!!.id.toString(),
                     sunset = formatUnixTime(response.body()!!.sys.sunset.toString(), "hh:mm a"),
