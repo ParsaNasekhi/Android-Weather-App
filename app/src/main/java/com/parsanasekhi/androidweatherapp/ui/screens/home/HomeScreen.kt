@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -52,9 +54,12 @@ import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
 import com.parsanasekhi.androidweatherapp.db.remote.ApiUrl
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
+import com.parsanasekhi.androidweatherapp.ui.theme.Orange
+import com.parsanasekhi.androidweatherapp.ui.theme.Transparent
+import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
-import com.parsanasekhi.androidweatherapp.ui.theme.Yellow
+import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
 
 @Composable
 fun HomeScreen(
@@ -66,6 +71,9 @@ fun HomeScreen(
 
     val cityName = remember {
         mutableStateOf("")
+    }
+    val clickedForecastItem = remember {
+        mutableStateOf<Int?>(null)
     }
 
     Column(
@@ -79,14 +87,29 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp), text = cityName
         ) { newText ->
+            clickedForecastItem.value = null
             cityName.value = newText
             homeViewModel.getCurrentWeather(cityName.value)
             homeViewModel.getForecastWeather(cityName.value, "5")
         }
         Spacer(modifier = Modifier.height(16.dp))
-        HomePagerView(modifier = Modifier.fillMaxWidth(), currentWeather)
-        ForecastWeatherView(modifier = Modifier.fillMaxWidth(), forecastWeather)
-        MoreInfoView(modifier = Modifier.fillMaxWidth(), currentWeather, homeViewModel)
+        HomePagerView(
+            modifier = Modifier.fillMaxWidth(),
+            currentWeather = currentWeather
+        )
+        ForecastWeatherListView(
+            modifier = Modifier.fillMaxWidth(),
+            currentWeather = currentWeather,
+            forecastWeather = forecastWeather,
+            clickedForecastItem = clickedForecastItem
+        ) { dayNum ->
+            clickedForecastItem.value = dayNum
+        }
+        MoreInfoView(
+            modifier = Modifier.fillMaxWidth(),
+            currentWeather = currentWeather,
+            homeViewModel = homeViewModel
+        )
     }
 }
 
@@ -107,7 +130,7 @@ private fun SearchCityView(
         },
         maxLines = 1,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Yellow,
+            focusedBorderColor = Orange,
             focusedTextColor = White,
             disabledBorderColor = TransparentWhite,
             disabledTextColor = TransparentWhite
@@ -169,7 +192,7 @@ private fun MoreInfoItem(
     ) {
         Text(
             text = title,
-            color = Yellow,
+            color = Orange,
             fontSize = 16.sp,
         )
         Spacer(modifier = Modifier.height(4.dp))
@@ -183,8 +206,12 @@ private fun MoreInfoItem(
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-private fun ForecastWeatherView(
-    modifier: Modifier = Modifier, forecastWeather: State<List<ForecastWeather.Detail>>
+private fun ForecastWeatherListView(
+    modifier: Modifier = Modifier,
+    currentWeather: State<CurrentWeather>,
+    forecastWeather: State<List<ForecastWeather.Detail>>,
+    clickedForecastItem: MutableState<Int?>,
+    onItemClicked: (Int?) -> Unit
 ) {
 
     val screenWidth = LocalConfiguration.current.screenWidthDp
@@ -195,7 +222,7 @@ private fun ForecastWeatherView(
     ) {
         Spacer(
             modifier = Modifier
-                .padding(vertical = 16.dp)
+                .padding(vertical = 8.dp)
                 .fillMaxWidth()
                 .height(1.dp)
                 .background(color = TransparentWhite)
@@ -207,49 +234,104 @@ private fun ForecastWeatherView(
                 .width(screenWidth.dp),
             contentPadding = PaddingValues(8.dp)
         ) {
-            items(forecastWeather.value.size) { dayNum ->
-                Column(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].date else "",
-                        color = White,
-                        fontSize = 12.sp,
-                    )
-                    Text(
-                        text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].time else "",
-                        color = TransparentWhite,
-                        fontSize = 12.sp,
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    if (forecastWeather.value[dayNum].icon.isNotEmpty())
+            item {
+                if (currentWeather.value != EmptyCurrentWeather)
+                    Column(
+                        modifier = Modifier
+                            .clickable {
+                                onItemClicked(null)
+                            }
+                            .background(color = if (clickedForecastItem.value == null) TransparentOrange else Transparent)
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Today",
+                            color = White,
+                            fontSize = 12.sp,
+                        )
+                        Text(
+                            text = "Right Now",
+                            color = TransparentWhite,
+                            fontSize = 12.sp,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
                         GlideImage(
-                            model = "${ApiUrl.LoadImageUrl}${forecastWeather.value[dayNum].icon}.png",
+                            model = "${ApiUrl.LoadImageUrl}${currentWeather.value.icon}.png",
                             contentDescription = "Forecast Weather Icon",
                             modifier = Modifier.size(48.dp),
                         )
-                    else
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = "Weather Icon",
-                            tint = White,
-                            modifier = Modifier.size(48.dp)
+                        Text(
+                            text = currentWeather.value.temp,
+                            color = White,
+                            fontSize = 16.sp,
                         )
-                    Text(
-                        text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].temp else "",
-                        color = White,
-                        fontSize = 16.sp,
-                    )
-                }
+                    }
+            }
+            items(forecastWeather.value.size) { dayNum ->
+                ForecastWeatherItemView(
+                    dayNum = dayNum,
+                    clickedForecastItem = clickedForecastItem,
+                    forecastWeather = forecastWeather,
+                    onItemClicked = onItemClicked
+                )
             }
         }
         Spacer(
             modifier = Modifier
-                .padding(vertical = 16.dp)
+                .padding(vertical = 8.dp)
                 .height(1.dp)
                 .fillMaxWidth()
                 .background(color = TransparentWhite)
+        )
+    }
+}
+
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+fun ForecastWeatherItemView(
+    dayNum: Int,
+    clickedForecastItem: MutableState<Int?>,
+    forecastWeather: State<List<ForecastWeather.Detail>>,
+    onItemClicked: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .clickable {
+                onItemClicked(dayNum)
+            }
+            .background(color = if (clickedForecastItem.value == dayNum) TransparentOrange else Transparent)
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].date else "",
+            color = White,
+            fontSize = 12.sp,
+        )
+        Text(
+            text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].time else "",
+            color = TransparentWhite,
+            fontSize = 12.sp,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        if (forecastWeather.value[dayNum].icon.isNotEmpty())
+            GlideImage(
+                model = "${ApiUrl.LoadImageUrl}${forecastWeather.value[dayNum].icon}.png",
+                contentDescription = "Forecast Weather Icon",
+                modifier = Modifier.size(48.dp),
+            )
+        else
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = "Weather Icon",
+                tint = White,
+                modifier = Modifier.size(48.dp)
+            )
+        Text(
+            text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].temp else "",
+            color = White,
+            fontSize = 16.sp,
         )
     }
 }
