@@ -1,4 +1,4 @@
-package com.parsanasekhi.androidweatherapp.db.local.bookmark
+package com.parsanasekhi.androidweatherapp.db.local.bookmarked_city
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

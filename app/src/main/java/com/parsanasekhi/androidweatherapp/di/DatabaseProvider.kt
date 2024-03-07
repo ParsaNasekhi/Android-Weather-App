@@ -3,7 +3,7 @@ package com.parsanasekhi.androidweatherapp.di
 import android.content.Context
 import androidx.room.Room
 import com.parsanasekhi.androidweatherapp.db.local.WeatherAppDatabase
-import com.parsanasekhi.androidweatherapp.db.local.bookmark.BookmarkedCityDao
+import com.parsanasekhi.androidweatherapp.db.local.bookmarked_city.BookmarkedCityDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
