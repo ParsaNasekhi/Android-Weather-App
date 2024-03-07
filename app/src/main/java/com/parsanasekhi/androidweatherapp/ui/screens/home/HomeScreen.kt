@@ -1,12 +1,12 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.home
 
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -103,6 +102,7 @@ fun HomeScreen(
             forecastWeather = forecastWeather,
             clickedForecastItem = clickedForecastItem
         ) { dayNum ->
+            Log.i("TestTag", "HomeScreen: clicked")
             clickedForecastItem.value = dayNum
         }
         MoreInfoView(
@@ -215,7 +215,6 @@ private fun ForecastWeatherListView(
 ) {
 
     val screenWidth = LocalConfiguration.current.screenWidthDp
-    val scrollState = rememberScrollState()
 
     Column(
         modifier = modifier
@@ -228,11 +227,10 @@ private fun ForecastWeatherListView(
                 .background(color = TransparentWhite)
         )
         LazyRow(
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.Start,
             modifier = Modifier
-                .horizontalScroll(scrollState)
                 .width(screenWidth.dp),
-            contentPadding = PaddingValues(8.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
             item {
                 if (currentWeather.value != EmptyCurrentWeather)
@@ -295,6 +293,7 @@ fun ForecastWeatherItemView(
     forecastWeather: State<List<ForecastWeather.Detail>>,
     onItemClicked: (Int) -> Unit
 ) {
+
     Column(
         modifier = Modifier
             .clickable {
