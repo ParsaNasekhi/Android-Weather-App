@@ -1,6 +1,5 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.home
 
-import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -94,7 +93,9 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(16.dp))
         HomePagerView(
             modifier = Modifier.fillMaxWidth(),
-            currentWeather = currentWeather
+            currentWeather = currentWeather,
+            forecastWeather = forecastWeather,
+            clickedForecastItem = clickedForecastItem
         )
         ForecastWeatherListView(
             modifier = Modifier.fillMaxWidth(),
@@ -102,12 +103,13 @@ fun HomeScreen(
             forecastWeather = forecastWeather,
             clickedForecastItem = clickedForecastItem
         ) { dayNum ->
-            Log.i("TestTag", "HomeScreen: clicked")
             clickedForecastItem.value = dayNum
         }
         MoreInfoView(
             modifier = Modifier.fillMaxWidth(),
             currentWeather = currentWeather,
+            forecastWeather = forecastWeather,
+            clickedForecastItem = clickedForecastItem,
             homeViewModel = homeViewModel
         )
     }
@@ -142,6 +144,8 @@ private fun SearchCityView(
 private fun MoreInfoView(
     modifier: Modifier = Modifier,
     currentWeather: State<CurrentWeather>,
+    forecastWeather: State<List<ForecastWeather.Detail>>,
+    clickedForecastItem: MutableState<Int?>,
     homeViewModel: HomeViewModel
 ) {
     Row(
@@ -150,7 +154,12 @@ private fun MoreInfoView(
         verticalAlignment = Alignment.CenterVertically
     ) {
         MoreInfoItem(
-            title = "wind", value = currentWeather.value.windSpeed
+            title = "wind",
+            value =
+            if (clickedForecastItem.value == null)
+                currentWeather.value.windSpeed
+            else
+                forecastWeather.value[clickedForecastItem.value!!].windSpeed
         )
         Spacer(
             modifier = Modifier
@@ -160,7 +169,12 @@ private fun MoreInfoView(
                 .background(color = TransparentWhite)
         )
         MoreInfoItem(
-            title = "humidity", value = currentWeather.value.humidity
+            title = "humidity",
+            value =
+            if (clickedForecastItem.value == null)
+                currentWeather.value.humidity
+            else
+                forecastWeather.value[clickedForecastItem.value!!].humidity
         )
         Spacer(
             modifier = Modifier
@@ -169,7 +183,14 @@ private fun MoreInfoView(
                 .width(1.dp)
                 .background(color = TransparentWhite)
         )
-        MoreInfoItem(title = "sunrise", value = currentWeather.value.sunrise.ifEmpty { "" })
+        MoreInfoItem(
+            title = "sunrise",
+            value =
+            if (clickedForecastItem.value == null)
+                currentWeather.value.sunrise
+            else
+                forecastWeather.value[clickedForecastItem.value!!].sunrise
+        )
         Spacer(
             modifier = Modifier
                 .padding(horizontal = 8.dp)
@@ -177,7 +198,14 @@ private fun MoreInfoView(
                 .width(1.dp)
                 .background(color = TransparentWhite)
         )
-        MoreInfoItem(title = "sunset", value = currentWeather.value.sunset.ifEmpty { "" })
+        MoreInfoItem(
+            title = "sunset",
+            value =
+            if (clickedForecastItem.value == null)
+                currentWeather.value.sunset
+            else
+                forecastWeather.value[clickedForecastItem.value!!].sunset
+        )
     }
 }
 
@@ -337,7 +365,12 @@ fun ForecastWeatherItemView(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HomePagerView(modifier: Modifier = Modifier, currentWeather: State<CurrentWeather>) {
+private fun HomePagerView(
+    modifier: Modifier = Modifier,
+    currentWeather: State<CurrentWeather>,
+    forecastWeather: State<List<ForecastWeather.Detail>>,
+    clickedForecastItem: MutableState<Int?>
+) {
 
     val pagerState = rememberPagerState { 2 }
 
@@ -347,8 +380,20 @@ private fun HomePagerView(modifier: Modifier = Modifier, currentWeather: State<C
         HorizontalPager(
             modifier = Modifier.fillMaxWidth(), state = pagerState
         ) { page ->
-            if (page == 0) CurrentWeatherView(modifier = Modifier.fillMaxWidth(), currentWeather)
-            else CurrentWeatherView(currentWeather = currentWeather)
+            if (page == 0)
+                CurrentWeatherView(
+                    modifier = Modifier.fillMaxWidth(),
+                    currentWeather = currentWeather,
+                    forecastWeather = forecastWeather,
+                    clickedForecastItem = clickedForecastItem
+                )
+            else
+                CurrentWeatherView(
+                    modifier = Modifier.fillMaxWidth(),
+                    currentWeather = currentWeather,
+                    forecastWeather = forecastWeather,
+                    clickedForecastItem = clickedForecastItem
+                )
         }
         Spacer(modifier = Modifier.height(16.dp))
         Row(
@@ -390,10 +435,14 @@ private fun HomePagerView(modifier: Modifier = Modifier, currentWeather: State<C
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun CurrentWeatherView(
-    modifier: Modifier = Modifier, currentWeather: State<CurrentWeather>
+    modifier: Modifier = Modifier,
+    currentWeather: State<CurrentWeather>,
+    forecastWeather: State<List<ForecastWeather.Detail>>,
+    clickedForecastItem: MutableState<Int?>
 ) {
     Column(
-        modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = currentWeather.value.name,
@@ -403,14 +452,22 @@ private fun CurrentWeatherView(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = currentWeather.value.description,
+            text =
+            if (clickedForecastItem.value == null)
+                currentWeather.value.description
+            else
+                forecastWeather.value[clickedForecastItem.value!!].description,
             color = TransparentWhite,
             fontSize = 24.sp,
         )
         Spacer(modifier = Modifier.height(14.dp))
         if (currentWeather.value.icon.isNotEmpty())
             GlideImage(
-                model = "${ApiUrl.LoadImageUrl}${currentWeather.value.icon}.png",
+                model =
+                if (clickedForecastItem.value == null)
+                    "${ApiUrl.LoadImageUrl}${currentWeather.value.icon}.png"
+                else
+                    "${ApiUrl.LoadImageUrl}${forecastWeather.value[clickedForecastItem.value!!].icon}.png",
                 contentDescription = "Current Weather Icon",
                 modifier = Modifier.size(100.dp),
             )
@@ -421,7 +478,11 @@ private fun CurrentWeatherView(
             modifier = Modifier.size(100.dp)
         )
         Text(
-            text = currentWeather.value.temp,
+            text =
+            if (clickedForecastItem.value == null)
+                currentWeather.value.temp
+            else
+                forecastWeather.value[clickedForecastItem.value!!].temp,
             color = White,
             fontSize = 48.sp,
             fontWeight = FontWeight.Bold
@@ -439,7 +500,11 @@ private fun CurrentWeatherView(
                     fontSize = 16.sp,
                 )
                 Text(
-                    text = currentWeather.value.maxTemp,
+                    text =
+                    if (clickedForecastItem.value == null)
+                        currentWeather.value.maxTemp
+                    else
+                        forecastWeather.value[clickedForecastItem.value!!].maxTemp,
                     color = White,
                     fontSize = 16.sp,
                 )
@@ -460,7 +525,11 @@ private fun CurrentWeatherView(
                     fontSize = 16.sp,
                 )
                 Text(
-                    text = currentWeather.value.minTemp,
+                    text =
+                    if (clickedForecastItem.value == null)
+                        currentWeather.value.minTemp
+                    else
+                        forecastWeather.value[clickedForecastItem.value!!].minTemp,
                     color = White,
                     fontSize = 16.sp,
                 )

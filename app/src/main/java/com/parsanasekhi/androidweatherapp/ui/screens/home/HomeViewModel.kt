@@ -66,7 +66,20 @@ class HomeViewModel @Inject constructor(
                                 temp = "${(it.main.temp - 273.15).roundToInt()}°C",
                                 date = formatUnixTime(it.dt.toString(), "MMM dd"),
                                 time = formatUnixTime(it.dt.toString(), "hh:mm a"),
-                                icon = it.weather[0].icon
+                                icon = it.weather[0].icon,
+                                minTemp = "${(it.main.tempMin - 273.15).roundToInt()}°C",
+                                maxTemp = "${(it.main.tempMax - 273.15).roundToInt()}°C",
+                                humidity = "${it.main.humidity}%",
+                                windSpeed = "${it.wind.speed} m/s",
+                                sunset = formatUnixTime(
+                                    response.body()!!.city.sunset.toString(),
+                                    "hh:mm a"
+                                ),
+                                sunrise = formatUnixTime(
+                                    response.body()!!.city.sunrise.toString(),
+                                    "hh:mm a"
+                                ),
+                                description = it.weather[0].description
                             )
                         )
                     }
