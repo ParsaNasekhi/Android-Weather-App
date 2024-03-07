@@ -57,6 +57,7 @@ dependencies {
     val composeUiVersion = "1.6.3"
     val hiltVersion = "1.2.0"
     val daggerHiltVersion = "2.49"
+    val roomVersion = "2.6.1"
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
@@ -86,6 +87,11 @@ dependencies {
 
     // glide:
     implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+
+    // room:
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
 
 //    implementation("androidx.constraintlayout:constraintlayout:2.2.0-alpha13")
 //    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha13")
