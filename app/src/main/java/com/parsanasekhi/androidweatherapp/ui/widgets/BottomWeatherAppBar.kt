@@ -32,7 +32,7 @@ fun BottomWeatherAppBar(
 ) {
     BottomAppBar(
         modifier = modifier,
-        containerColor = Transparent
+        containerColor = Transparent,
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
