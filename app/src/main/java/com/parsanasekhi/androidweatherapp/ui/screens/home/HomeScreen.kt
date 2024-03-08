@@ -55,7 +55,6 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.parsanasekhi.androidweatherapp.data.City
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
-import com.parsanasekhi.androidweatherapp.db.remote.ApiUrl
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.Orange
 import com.parsanasekhi.androidweatherapp.ui.theme.Transparent
@@ -408,12 +407,13 @@ private fun HomePagerView(
     val pagerState = rememberPagerState { 2 }
 
     Column(
-        modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp),
+                .height(320.dp),
             state = pagerState
         ) { page ->
             if (page == 0)
@@ -629,7 +629,7 @@ private fun CurrentWeatherPageView(
                 if (clickedForecastItem.value == null)
                     currentWeather.value.icon
                 else
-                    "${ApiUrl.LoadImageUrl}${forecastWeather.value[clickedForecastItem.value!!].icon}.png",
+                    forecastWeather.value[clickedForecastItem.value!!].icon,
                 contentDescription = "Current Weather Icon",
                 modifier = Modifier.size(100.dp),
             )

@@ -36,7 +36,7 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
                 lat = response.body()!!.coord.lat.toString(),
                 lon = response.body()!!.coord.lon.toString()
             ),
-            icon = response.body()!!.weather[0].icon,
+            icon = "${ApiUrl.LoadImageUrl}${response.body()!!.weather[0].icon}.png",
             description = response.body()!!.weather[0].description,
             temp = "${(response.body()!!.main.temp - 273.15).roundToInt()}°C",
             minTemp = "${(response.body()!!.main.tempMin - 273.15).roundToInt()}°C",
