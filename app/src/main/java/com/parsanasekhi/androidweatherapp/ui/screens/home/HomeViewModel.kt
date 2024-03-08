@@ -87,7 +87,7 @@ class HomeViewModel @Inject constructor(
                     _currentWeatherLoadState.value = LoadState.ERROR
                     Log.w("ManualLog", "getCurrentWeather/catch: ${throwable.message}")
                 }.collectLatest { response ->
-                    checkIsCityBookmarked(response.id!!)
+                    checkIsCityBookmarked(response.cityId!!)
                     _currentWeather.value = response
                     _currentWeatherLoadState.value = LoadState.SUCCESS
                 }

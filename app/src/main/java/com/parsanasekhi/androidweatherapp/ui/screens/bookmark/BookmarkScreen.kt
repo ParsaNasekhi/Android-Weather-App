@@ -3,6 +3,8 @@ package com.parsanasekhi.androidweatherapp.ui.screens.bookmark
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,8 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.parsanasekhi.androidweatherapp.data.City
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
-import com.parsanasekhi.androidweatherapp.db.remote.ApiUrl
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.Orange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentBlack
@@ -57,6 +60,8 @@ fun BookmarkScreen(
     val citiesWeather = bookmarkViewModel.citiesWeather
     Log.i("TestLog", "BookmarkScreen: ${citiesWeather.toList()}")
 
+    val scope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -66,14 +71,17 @@ fun BookmarkScreen(
                 .fillMaxSize()
                 .padding(vertical = 8.dp, horizontal = 16.dp),
             citiesWeather
-        )
+        ) { city ->
+                bookmarkViewModel.unbookmarkCity(city)
+        }
     }
 }
 
 @Composable
 fun BookmarkedListView(
     modifier: Modifier = Modifier,
-    citiesWeather: SnapshotStateList<CurrentWeather>
+    citiesWeather: SnapshotStateList<CurrentWeather>,
+    onDelete: (City) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -96,7 +104,8 @@ fun BookmarkedListView(
                     .padding(vertical = 8.dp)
                     .fillMaxWidth()
                     .height(90.dp),
-                cityWeather = citiesWeather[index]
+                cityWeather = citiesWeather[index],
+                onDelete = onDelete
             )
 
             LaunchedEffect(key1 = null) {
@@ -109,15 +118,24 @@ fun BookmarkedListView(
 
 }
 
-@OptIn(ExperimentalGlideComposeApi::class)
+@OptIn(ExperimentalGlideComposeApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun BookmarkedView(
     modifier: Modifier = Modifier,
-    cityWeather: CurrentWeather
+    cityWeather: CurrentWeather,
+    onDelete: (City) -> Unit
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = TransparentBlack),
-        modifier = modifier,
+        modifier = modifier
+            .combinedClickable(
+                onLongClick = {
+                    onDelete(City(cityWeather.cityName, cityWeather.cityId!!))
+                },
+                onClick = {
+
+                }
+            ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(

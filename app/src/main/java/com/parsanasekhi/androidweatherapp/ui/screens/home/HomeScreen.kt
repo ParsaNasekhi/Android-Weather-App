@@ -1,6 +1,5 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.home
 
-import androidx.collection.emptyLongSet
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -85,6 +84,13 @@ fun HomeScreen(
 
     val scope = rememberCoroutineScope()
 
+    remember {
+        if (currentWeather.value.cityId != null)
+            scope.launch {
+                homeViewModel.checkIsCityBookmarked(currentWeather.value.cityId!!)
+            }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -113,9 +119,9 @@ fun HomeScreen(
                 homeViewModel.bookmarkCity(city)
             else
                 homeViewModel.unbookmarkCity(city)
-                scope.launch {
-                    homeViewModel.checkIsCityBookmarked(city.id)
-                }
+            scope.launch {
+                homeViewModel.checkIsCityBookmarked(city.id)
+            }
         }
         ForecastWeatherListView(
             modifier = Modifier.fillMaxWidth(),
@@ -530,11 +536,11 @@ fun AboutCityPageView(
         }
         TextButton(
             onClick = {
-                if (currentWeather.value.id != null)
+                if (currentWeather.value.cityId != null)
                     onBookmark(
                         City(
                             currentWeather.value.cityName,
-                            currentWeather.value.id!!
+                            currentWeather.value.cityId!!
                         )
                     )
             },

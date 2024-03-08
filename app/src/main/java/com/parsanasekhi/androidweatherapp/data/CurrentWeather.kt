@@ -3,7 +3,7 @@ package com.parsanasekhi.androidweatherapp.data
 data class CurrentWeather(
     val cityName: String,
     val location: Location,
-    val id: Int?,
+    val cityId: Int?,
     override val description: String,
     override val icon: String,
     override val temp: String,

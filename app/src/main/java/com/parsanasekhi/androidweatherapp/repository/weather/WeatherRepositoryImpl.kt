@@ -48,7 +48,7 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
             country = response.body()!!.sys.country,
             date = formatUnixTime(response.body()!!.dt.toString(), "MMM/dd/YYYY"),
             time = formatUnixTime(response.body()!!.dt.toString(), "hh:mm a"),
-            id = response.body()!!.id
+            cityId = response.body()!!.id
         )
     }.flowOn(Dispatchers.IO)
 
@@ -120,7 +120,7 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
             country = response.body()!!.sys.country,
             date = formatUnixTime(response.body()!!.dt.toString(), "MMM/dd/YYYY"),
             time = formatUnixTime(response.body()!!.dt.toString(), "hh:mm a"),
-            id = response.body()!!.id
+            cityId = response.body()!!.id
         )
     }.flowOn(Dispatchers.IO)
 }
