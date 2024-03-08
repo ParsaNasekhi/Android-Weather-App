@@ -108,7 +108,7 @@ class HomeViewModel @Inject constructor(
                 response.isSuccessful && response.body() != null
             }.map { response ->
                 CurrentWeather(
-                    name = response.body()!!.name,
+                    cityName = response.body()!!.name,
                     location = Location(
                         lat = response.body()!!.coord.lat.toString(),
                         lon = response.body()!!.coord.lon.toString()
@@ -119,10 +119,13 @@ class HomeViewModel @Inject constructor(
                     minTemp = "${(response.body()!!.main.tempMin - 273.15).roundToInt()}°C",
                     maxTemp = "${(response.body()!!.main.tempMax - 273.15).roundToInt()}°C",
                     humidity = "${response.body()!!.main.humidity}%",
-                    id = response.body()!!.id.toString(),
                     sunset = formatUnixTime(response.body()!!.sys.sunset.toString(), "hh:mm a"),
                     sunrise = formatUnixTime(response.body()!!.sys.sunrise.toString(), "hh:mm a"),
-                    windSpeed = "${response.body()!!.wind.speed} m/s"
+                    windSpeed = "${response.body()!!.wind.speed} m/s",
+                    country = response.body()!!.sys.country,
+                    date = formatUnixTime(response.body()!!.dt.toString(), "MMM dd YYYY"),
+                    time = formatUnixTime(response.body()!!.dt.toString(), "hh:mm a"),
+                    id = response.body()!!.id
                 )
             }.collect { response ->
                 _currentWeather.value = response

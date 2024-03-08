@@ -1,16 +1,31 @@
 package com.parsanasekhi.androidweatherapp.data
 
 data class CurrentWeather(
-    val name: String,
+    val cityName: String,
     val location: Location,
-    val description: String,
-    val icon: String,
-    val temp: String,
-    val minTemp: String,
-    val maxTemp: String,
-    val sunrise: String,
-    val sunset: String,
-    val humidity: String,
-    val windSpeed: String,
-    val id: String
+    val id: Int?,
+    override val description: String,
+    override val icon: String,
+    override val temp: String,
+    override val minTemp: String,
+    override val maxTemp: String,
+    override val sunrise: String,
+    override val sunset: String,
+    override val humidity: String,
+    override val windSpeed: String,
+    override val time: String,
+    override val date: String,
+    val country: String
+) : ForecastWeather.Detail(
+    temp = temp,
+    icon = icon,
+    minTemp = minTemp,
+    maxTemp = maxTemp,
+    sunrise = sunrise,
+    sunset = sunset,
+    humidity = humidity,
+    windSpeed = windSpeed,
+    time = time,
+    date = date,
+    description = description
 )

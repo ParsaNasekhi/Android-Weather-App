@@ -1,17 +1,17 @@
 package com.parsanasekhi.androidweatherapp.data
 
 class ForecastWeather : ArrayList<ForecastWeather.Detail>() {
-    data class Detail (
-        val temp: String,
-        val date: String,
-        val time: String,
-        val icon: String,
-        val minTemp: String,
-        val maxTemp: String,
-        val humidity: String,
-        val windSpeed: String,
-        val sunset: String,
-        val sunrise: String,
-        val description: String
+    open class Detail (
+        open val temp: String,
+        open val date: String,
+        open val time: String,
+        open val icon: String,
+        open val minTemp: String,
+        open val maxTemp: String,
+        open val humidity: String,
+        open val windSpeed: String,
+        open val sunset: String,
+        open val sunrise: String,
+        open val description: String
     )
 }

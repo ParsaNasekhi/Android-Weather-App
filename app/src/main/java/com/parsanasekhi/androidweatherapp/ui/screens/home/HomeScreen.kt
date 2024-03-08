@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,11 +26,13 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -48,12 +51,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.parsanasekhi.androidweatherapp.data.City
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
 import com.parsanasekhi.androidweatherapp.db.remote.ApiUrl
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.Orange
 import com.parsanasekhi.androidweatherapp.ui.theme.Transparent
+import com.parsanasekhi.androidweatherapp.ui.theme.TransparentBlack
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
@@ -96,7 +101,9 @@ fun HomeScreen(
             currentWeather = currentWeather,
             forecastWeather = forecastWeather,
             clickedForecastItem = clickedForecastItem
-        )
+        ) { city ->
+
+        }
         ForecastWeatherListView(
             modifier = Modifier.fillMaxWidth(),
             currentWeather = currentWeather,
@@ -321,7 +328,6 @@ fun ForecastWeatherItemView(
     forecastWeather: State<List<ForecastWeather.Detail>>,
     onItemClicked: (Int) -> Unit
 ) {
-
     Column(
         modifier = Modifier
             .clickable {
@@ -369,7 +375,8 @@ private fun HomePagerView(
     modifier: Modifier = Modifier,
     currentWeather: State<CurrentWeather>,
     forecastWeather: State<List<ForecastWeather.Detail>>,
-    clickedForecastItem: MutableState<Int?>
+    clickedForecastItem: MutableState<Int?>,
+    onBookmark: (City) -> Unit
 ) {
 
     val pagerState = rememberPagerState { 2 }
@@ -378,21 +385,26 @@ private fun HomePagerView(
         modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally
     ) {
         HorizontalPager(
-            modifier = Modifier.fillMaxWidth(), state = pagerState
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp),
+            state = pagerState
         ) { page ->
             if (page == 0)
-                CurrentWeatherView(
-                    modifier = Modifier.fillMaxWidth(),
+                CurrentWeatherPageView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(),
                     currentWeather = currentWeather,
                     forecastWeather = forecastWeather,
                     clickedForecastItem = clickedForecastItem
                 )
             else
-                CurrentWeatherView(
-                    modifier = Modifier.fillMaxWidth(),
+                AboutCityPageView(
+                    modifier = Modifier
+                        .fillMaxSize(),
                     currentWeather = currentWeather,
-                    forecastWeather = forecastWeather,
-                    clickedForecastItem = clickedForecastItem
+                    onBookmark = onBookmark
                 )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -432,9 +444,127 @@ private fun HomePagerView(
     }
 }
 
+@Composable
+fun AboutCityPageView(
+    modifier: Modifier = Modifier,
+    currentWeather: State<CurrentWeather>,
+    onBookmark: (City) -> Unit
+) {
+
+    val spacerHeight = 16.dp
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .weight(1f),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .weight(1f),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                AboutCityItemView(
+                    title = "City",
+                    value = currentWeather.value.cityName
+                )
+                Spacer(modifier = Modifier.height(spacerHeight))
+                AboutCityItemView(
+                    title = "Date",
+                    value = currentWeather.value.date
+                )
+                Spacer(modifier = Modifier.height(spacerHeight))
+                AboutCityItemView(
+                    title = "Latitude",
+                    value = currentWeather.value.location.lat
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .weight(1f),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                AboutCityItemView(
+                    title = "Country",
+                    value = currentWeather.value.country
+                )
+                Spacer(modifier = Modifier.height(spacerHeight))
+                AboutCityItemView(
+                    title = "Time",
+                    value = currentWeather.value.time
+                )
+                Spacer(modifier = Modifier.height(spacerHeight))
+                AboutCityItemView(
+                    title = "Longitude",
+                    value = currentWeather.value.location.lon
+                )
+            }
+
+        }
+        TextButton(
+            onClick = {
+                if (currentWeather.value.id != null)
+                    onBookmark(
+                        City(
+                            currentWeather.value.cityName,
+                            currentWeather.value.id!!
+                        )
+                    )
+            },
+            colors = ButtonColors(
+                containerColor = TransparentOrange,
+                contentColor = Orange,
+                disabledContainerColor = TransparentBlack,
+                disabledContentColor = Orange
+            ),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = "bookmark this city",
+                fontSize = 16.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun AboutCityItemView(
+    modifier: Modifier = Modifier,
+    title: String,
+    value: String
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Text(
+            text = "$title:",
+            color = TransparentWhite,
+            fontSize = 16.sp
+        )
+        Text(
+            text = value,
+            color = White,
+            fontSize = 16.sp
+        )
+    }
+}
+
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-private fun CurrentWeatherView(
+private fun CurrentWeatherPageView(
     modifier: Modifier = Modifier,
     currentWeather: State<CurrentWeather>,
     forecastWeather: State<List<ForecastWeather.Detail>>,
@@ -445,7 +575,7 @@ private fun CurrentWeatherView(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = currentWeather.value.name,
+            text = currentWeather.value.cityName,
             color = White,
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold

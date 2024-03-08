@@ -6,6 +6,6 @@ import androidx.room.PrimaryKey
 @Entity("bookmarked_cities_table")
 data class BookmarkedCityEntity(
     val cityName: String,
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = false)
     val id: Int
 )
