@@ -3,25 +3,19 @@ package com.parsanasekhi.androidweatherapp.ui.screens.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
-import com.parsanasekhi.androidweatherapp.data.Location
 import com.parsanasekhi.androidweatherapp.repository.geocoding.GeocodingRepository
 import com.parsanasekhi.androidweatherapp.repository.weather.WeatherRepository
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
 import com.parsanasekhi.androidweatherapp.utills.LoadState
-import com.parsanasekhi.androidweatherapp.utills.formatUnixTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -52,38 +46,6 @@ class HomeViewModel @Inject constructor(
                 }.catch { throwable ->
                     _forecastWeatherLoadState.value = LoadState.ERROR
                     Log.w("ManualLog", "getForecastWeather/catch: ${throwable.message}")
-                }.filter { response ->
-                    if (!response.isSuccessful) {
-                        Log.w("ManualLog", "getForecastWeather/filter: ${response.message()}")
-                        _currentWeatherLoadState.value = LoadState.ERROR
-                    }
-                    response.isSuccessful && response.body() != null
-                }.map { response ->
-                    val forecastWeather = ForecastWeather()
-                    response.body()!!.list.forEach {
-                        forecastWeather.add(
-                            ForecastWeather.Detail(
-                                temp = "${(it.main.temp - 273.15).roundToInt()}°C",
-                                date = formatUnixTime(it.dt.toString(), "MMM dd"),
-                                time = formatUnixTime(it.dt.toString(), "hh:mm a"),
-                                icon = it.weather[0].icon,
-                                minTemp = "${(it.main.tempMin - 273.15).roundToInt()}°C",
-                                maxTemp = "${(it.main.tempMax - 273.15).roundToInt()}°C",
-                                humidity = "${it.main.humidity}%",
-                                windSpeed = "${it.wind.speed} m/s",
-                                sunset = formatUnixTime(
-                                    response.body()!!.city.sunset.toString(),
-                                    "hh:mm a"
-                                ),
-                                sunrise = formatUnixTime(
-                                    response.body()!!.city.sunrise.toString(),
-                                    "hh:mm a"
-                                ),
-                                description = it.weather[0].description
-                            )
-                        )
-                    }
-                    forecastWeather
                 }.collectLatest { forecastWeather ->
                     _forecastWeather.value = forecastWeather.toList()
                     _forecastWeatherLoadState.value = LoadState.SUCCESS
@@ -93,44 +55,16 @@ class HomeViewModel @Inject constructor(
 
     fun getCurrentWeather(cityName: String) {
         viewModelScope.launch {
-            weatherRepository.getCurrentWeather(
-                cityName = cityName
-            ).onStart {
-                _currentWeatherLoadState.value = LoadState.LOADING
-            }.catch { throwable ->
-                _currentWeatherLoadState.value = LoadState.ERROR
-                Log.w("ManualLog", "getCurrentWeather/catch: ${throwable.message}")
-            }.filter { response ->
-                if (!response.isSuccessful || response.body() == null) {
+            weatherRepository.getCurrentWeather(cityName = cityName)
+                .onStart {
+                    _currentWeatherLoadState.value = LoadState.LOADING
+                }.catch { throwable ->
                     _currentWeatherLoadState.value = LoadState.ERROR
-                    Log.w("ManualLog", "getCurrentWeather/catch: ${response.message()}")
+                    Log.w("ManualLog", "getCurrentWeather/catch: ${throwable.message}")
+                }.collectLatest { response ->
+                    _currentWeather.value = response
+                    _currentWeatherLoadState.value = LoadState.SUCCESS
                 }
-                response.isSuccessful && response.body() != null
-            }.map { response ->
-                CurrentWeather(
-                    cityName = response.body()!!.name,
-                    location = Location(
-                        lat = response.body()!!.coord.lat.toString(),
-                        lon = response.body()!!.coord.lon.toString()
-                    ),
-                    icon = response.body()!!.weather[0].icon,
-                    description = response.body()!!.weather[0].description,
-                    temp = "${(response.body()!!.main.temp - 273.15).roundToInt()}°C",
-                    minTemp = "${(response.body()!!.main.tempMin - 273.15).roundToInt()}°C",
-                    maxTemp = "${(response.body()!!.main.tempMax - 273.15).roundToInt()}°C",
-                    humidity = "${response.body()!!.main.humidity}%",
-                    sunset = formatUnixTime(response.body()!!.sys.sunset.toString(), "hh:mm a"),
-                    sunrise = formatUnixTime(response.body()!!.sys.sunrise.toString(), "hh:mm a"),
-                    windSpeed = "${response.body()!!.wind.speed} m/s",
-                    country = response.body()!!.sys.country,
-                    date = formatUnixTime(response.body()!!.dt.toString(), "MMM dd YYYY"),
-                    time = formatUnixTime(response.body()!!.dt.toString(), "hh:mm a"),
-                    id = response.body()!!.id
-                )
-            }.collect { response ->
-                _currentWeather.value = response
-                _currentWeatherLoadState.value = LoadState.SUCCESS
-            }
         }
     }
 
