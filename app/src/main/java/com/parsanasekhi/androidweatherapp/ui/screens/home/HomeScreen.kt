@@ -102,7 +102,7 @@ fun HomeScreen(
             forecastWeather = forecastWeather,
             clickedForecastItem = clickedForecastItem
         ) { city ->
-
+            homeViewModel.bookmarkCity(city)
         }
         ForecastWeatherListView(
             modifier = Modifier.fillMaxWidth(),

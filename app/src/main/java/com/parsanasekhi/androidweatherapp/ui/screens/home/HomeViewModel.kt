@@ -3,7 +3,9 @@ package com.parsanasekhi.androidweatherapp.ui.screens.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.parsanasekhi.androidweatherapp.data.City
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
+import com.parsanasekhi.androidweatherapp.repository.bookmarked_city.BookmarkedCityRepository
 import com.parsanasekhi.androidweatherapp.repository.geocoding.GeocodingRepository
 import com.parsanasekhi.androidweatherapp.repository.weather.WeatherRepository
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
@@ -20,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
+    private val bookmarkedCityRepository: BookmarkedCityRepository,
     private val geocodingRepository: GeocodingRepository
 ) : ViewModel() {
 
@@ -36,6 +39,12 @@ class HomeViewModel @Inject constructor(
     init {
         getCurrentWeather("Mashhad")
         getForecastWeather("Mashhad", "5")
+    }
+
+    fun bookmarkCity(city: City) {
+        viewModelScope.launch {
+            bookmarkedCityRepository.insertCity(city)
+        }
     }
 
     fun getForecastWeather(cityName: String, daysCount: String) {

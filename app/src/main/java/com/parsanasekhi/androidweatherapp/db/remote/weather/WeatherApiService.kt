@@ -17,10 +17,15 @@ interface WeatherApiService {
         @Query("appid") apiKey: String = API_KEY
     ): Response<CurrentWeatherResponse>
 
+    @GET(ApiUrl.CurrentWeather)
+    suspend fun getCityWeatherById(
+        @Query("id") id: Int,
+        @Query("appid") apiKey: String = API_KEY
+    ): Response<CurrentWeatherResponse>
+
     @GET(ApiUrl.ForecastWeather)
     suspend fun getForecastWeather(
         @Query("q") cityName: String,
-//        @Query("cnt") daysCount: String,
         @Query("appid") apiKey: String = API_KEY
     ): Response<ForecastWeatherResponse>
 

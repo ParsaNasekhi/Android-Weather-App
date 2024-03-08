@@ -15,4 +15,8 @@ interface WeatherRepository {
         daysCount: String,
     ): Flow<ForecastWeather>
 
+    suspend fun getCityWeatherById(
+        id: Int
+    ): Flow<CurrentWeather>
+
 }
