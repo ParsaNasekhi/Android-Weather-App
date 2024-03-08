@@ -11,9 +11,11 @@ interface BookmarkedCityRepository {
     )
 
     suspend fun deleteCity(
-        bookmarkedCityEntity: BookmarkedCityEntity
+        city: City
     )
 
     suspend fun gelAllCities(): Flow<List<City>>
+
+    suspend fun checkCityExist(id: Int): Flow<Boolean>
 
 }

@@ -1,5 +1,6 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.home
 
+import androidx.collection.emptyLongSet
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -39,6 +40,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +65,7 @@ import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -71,6 +74,7 @@ fun HomeScreen(
 
     val currentWeather = homeViewModel.currentWeather.collectAsState()
     val forecastWeather = homeViewModel.forecastWeather.collectAsState()
+    val isCityBookmarked = homeViewModel.isCityBookmarked.collectAsState()
 
     val cityName = remember {
         mutableStateOf("")
@@ -78,6 +82,8 @@ fun HomeScreen(
     val clickedForecastItem = remember {
         mutableStateOf<Int?>(null)
     }
+
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -100,9 +106,16 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth(),
             currentWeather = currentWeather,
             forecastWeather = forecastWeather,
-            clickedForecastItem = clickedForecastItem
+            clickedForecastItem = clickedForecastItem,
+            isCityBookmarked = isCityBookmarked
         ) { city ->
-            homeViewModel.bookmarkCity(city)
+            if (!isCityBookmarked.value)
+                homeViewModel.bookmarkCity(city)
+            else
+                homeViewModel.unbookmarkCity(city)
+                scope.launch {
+                    homeViewModel.checkIsCityBookmarked(city.id)
+                }
         }
         ForecastWeatherListView(
             modifier = Modifier.fillMaxWidth(),
@@ -376,6 +389,7 @@ private fun HomePagerView(
     currentWeather: State<CurrentWeather>,
     forecastWeather: State<List<ForecastWeather.Detail>>,
     clickedForecastItem: MutableState<Int?>,
+    isCityBookmarked: State<Boolean>,
     onBookmark: (City) -> Unit
 ) {
 
@@ -404,7 +418,8 @@ private fun HomePagerView(
                     modifier = Modifier
                         .fillMaxSize(),
                     currentWeather = currentWeather,
-                    onBookmark = onBookmark
+                    onBookmark = onBookmark,
+                    isCityBookmarked = isCityBookmarked
                 )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -448,7 +463,8 @@ private fun HomePagerView(
 fun AboutCityPageView(
     modifier: Modifier = Modifier,
     currentWeather: State<CurrentWeather>,
-    onBookmark: (City) -> Unit
+    onBookmark: (City) -> Unit,
+    isCityBookmarked: State<Boolean>
 ) {
 
     val spacerHeight = 16.dp
@@ -533,7 +549,11 @@ fun AboutCityPageView(
                 .fillMaxWidth()
         ) {
             Text(
-                text = "bookmark this city",
+                text =
+                if (!isCityBookmarked.value)
+                    "bookmark this city"
+                else
+                    "unbookmark the city",
                 fontSize = 16.sp
             )
         }

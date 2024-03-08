@@ -36,6 +36,9 @@ class HomeViewModel @Inject constructor(
     private val _forecastWeatherLoadState = MutableStateFlow(LoadState.LOADING)
     val forecastWeatherLoadState = _forecastWeatherLoadState.asStateFlow()
 
+    private val _isCityBookmarked = MutableStateFlow(false)
+    val isCityBookmarked = _isCityBookmarked.asStateFlow()
+
     init {
         getCurrentWeather("Mashhad")
         getForecastWeather("Mashhad", "5")
@@ -45,6 +48,19 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             bookmarkedCityRepository.insertCity(city)
         }
+    }
+
+    fun unbookmarkCity(city: City) {
+        viewModelScope.launch {
+            bookmarkedCityRepository.deleteCity(city)
+        }
+    }
+
+    suspend fun checkIsCityBookmarked(id: Int) {
+        bookmarkedCityRepository.checkCityExist(id)
+            .collectLatest {
+                _isCityBookmarked.value = it
+            }
     }
 
     fun getForecastWeather(cityName: String, daysCount: String) {
@@ -71,6 +87,7 @@ class HomeViewModel @Inject constructor(
                     _currentWeatherLoadState.value = LoadState.ERROR
                     Log.w("ManualLog", "getCurrentWeather/catch: ${throwable.message}")
                 }.collectLatest { response ->
+                    checkIsCityBookmarked(response.id!!)
                     _currentWeather.value = response
                     _currentWeatherLoadState.value = LoadState.SUCCESS
                 }

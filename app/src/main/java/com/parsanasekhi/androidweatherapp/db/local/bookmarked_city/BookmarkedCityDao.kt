@@ -15,7 +15,10 @@ interface BookmarkedCityDao {
     @Delete
     suspend fun deleteCity(bookmarkedCandidate: BookmarkedCityEntity)
 
-    @Query("SELECT * FROM bookmarked_cities_table")
+    @Query("SELECT * FROM bookmarked_cities_table ORDER BY cityName")
     suspend fun getAllCities(): List<BookmarkedCityEntity>
+
+    @Query("SELECT COUNT(*) FROM bookmarked_cities_table WHERE :id = id")
+    suspend fun checkCityExist(id: Int): Int
 
 }
