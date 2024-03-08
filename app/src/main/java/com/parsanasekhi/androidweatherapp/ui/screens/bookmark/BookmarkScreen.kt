@@ -16,11 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
+import com.parsanasekhi.androidweatherapp.db.remote.ApiUrl
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.Orange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentBlack
@@ -107,9 +107,9 @@ fun BookmarkedListView(
     }
 
 
-
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun BookmarkedView(
     modifier: Modifier = Modifier,
@@ -131,11 +131,10 @@ fun BookmarkedView(
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = "Weather Icon",
-                    tint = White,
-                    modifier = Modifier.size(64.dp)
+                GlideImage(
+                    model = cityWeather.icon,
+                    contentDescription = "City Weather Icon",
+                    modifier = Modifier.size(64.dp),
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))

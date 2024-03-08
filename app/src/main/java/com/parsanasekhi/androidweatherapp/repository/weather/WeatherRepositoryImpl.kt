@@ -3,6 +3,7 @@ package com.parsanasekhi.androidweatherapp.repository.weather
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
 import com.parsanasekhi.androidweatherapp.data.Location
+import com.parsanasekhi.androidweatherapp.db.remote.ApiUrl
 import com.parsanasekhi.androidweatherapp.db.remote.weather.WeatherApiService
 import com.parsanasekhi.androidweatherapp.utills.formatUnixTime
 import kotlinx.coroutines.Dispatchers
@@ -71,7 +72,7 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
                     temp = "${(it.main.temp - 273.15).roundToInt()}°C",
                     date = formatUnixTime(it.dt.toString(), "MMM dd"),
                     time = formatUnixTime(it.dt.toString(), "hh:mm a"),
-                    icon = it.weather[0].icon,
+                    icon = "${ApiUrl.LoadImageUrl}${it.weather[0].icon}.png",
                     minTemp = "${(it.main.tempMin - 273.15).roundToInt()}°C",
                     maxTemp = "${(it.main.tempMax - 273.15).roundToInt()}°C",
                     humidity = "${it.main.humidity}%",
@@ -107,7 +108,7 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
                 lat = response.body()!!.coord.lat.toString(),
                 lon = response.body()!!.coord.lon.toString()
             ),
-            icon = response.body()!!.weather[0].icon,
+            icon = "${ApiUrl.LoadImageUrl}${response.body()!!.weather[0].icon}.png",
             description = response.body()!!.weather[0].description,
             temp = "${(response.body()!!.main.temp - 273.15).roundToInt()}°C",
             minTemp = "${(response.body()!!.main.tempMin - 273.15).roundToInt()}°C",

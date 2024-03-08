@@ -303,7 +303,7 @@ private fun ForecastWeatherListView(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         GlideImage(
-                            model = "${ApiUrl.LoadImageUrl}${currentWeather.value.icon}.png",
+                            model = currentWeather.value.icon,
                             contentDescription = "Forecast Weather Icon",
                             modifier = Modifier.size(48.dp),
                         )
@@ -363,7 +363,7 @@ fun ForecastWeatherItemView(
         Spacer(modifier = Modifier.height(4.dp))
         if (forecastWeather.value[dayNum].icon.isNotEmpty())
             GlideImage(
-                model = "${ApiUrl.LoadImageUrl}${forecastWeather.value[dayNum].icon}.png",
+                model = forecastWeather.value[dayNum].icon,
                 contentDescription = "Forecast Weather Icon",
                 modifier = Modifier.size(48.dp),
             )
@@ -615,7 +615,7 @@ private fun CurrentWeatherPageView(
             GlideImage(
                 model =
                 if (clickedForecastItem.value == null)
-                    "${ApiUrl.LoadImageUrl}${currentWeather.value.icon}.png"
+                    currentWeather.value.icon
                 else
                     "${ApiUrl.LoadImageUrl}${forecastWeather.value[clickedForecastItem.value!!].icon}.png",
                 contentDescription = "Current Weather Icon",
