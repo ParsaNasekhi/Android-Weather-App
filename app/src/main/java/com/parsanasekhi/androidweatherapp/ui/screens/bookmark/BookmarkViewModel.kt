@@ -44,7 +44,6 @@ class BookmarkViewModel @Inject constructor(
             _cities.value = listOf()
             _citiesWeather.clear()
             getBookmarkedCities()
-            Log.i("TestLog", "getBookmarkedCitiesWeather: ${_cities.value}")
             _cities.value.forEach {
                 getCityWeather(it.id)
             }

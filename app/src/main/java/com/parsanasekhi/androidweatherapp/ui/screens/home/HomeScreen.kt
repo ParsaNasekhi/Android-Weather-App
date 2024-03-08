@@ -64,6 +64,7 @@ import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
+import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -89,6 +90,11 @@ fun HomeScreen(
             scope.launch {
                 homeViewModel.checkIsCityBookmarked(currentWeather.value.cityId!!)
             }
+    }
+
+    if (cityFromBookmarkScreen.value != null) {
+        homeViewModel.getCurrentWeatherByCityId(cityFromBookmarkScreen.value!!.id)
+        cityFromBookmarkScreen.value = null
     }
 
     Column(
@@ -694,13 +700,19 @@ private fun CurrentWeatherPageView(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
+
+    val pagerState = rememberPagerState {
+        1
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(), color = Color.Gray
     ) {
-        MainScreen(pageCount = 1) {
+        MainScreen(pagerState) {
             HomeScreen()
         }
     }

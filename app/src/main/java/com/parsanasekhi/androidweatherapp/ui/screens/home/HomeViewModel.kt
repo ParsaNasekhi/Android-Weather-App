@@ -93,5 +93,20 @@ class HomeViewModel @Inject constructor(
                 }
         }
     }
+    fun getCurrentWeatherByCityId(cityId: Int) {
+        viewModelScope.launch {
+            weatherRepository.getCityWeatherById(cityId)
+                .onStart {
+//                    _currentWeatherLoadState.value = LoadState.LOADING
+                }.catch { throwable ->
+//                    _currentWeatherLoadState.value = LoadState.ERROR
+                    Log.w("ManualLog", "getCurrentWeatherByCityId/catch: ${throwable.message}")
+                }.collectLatest { response ->
+                    checkIsCityBookmarked(response.cityId!!)
+                    _currentWeather.value = response
+//                    _currentWeatherLoadState.value = LoadState.SUCCESS
+                }
+        }
+    }
 
 }

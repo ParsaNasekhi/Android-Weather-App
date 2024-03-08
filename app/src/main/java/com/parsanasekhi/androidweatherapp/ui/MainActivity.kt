@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -42,18 +44,22 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AndroidWeatherAppTheme {
+
+                val pagerState = rememberPagerState { 2 }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen(pageCount = 2) { page ->
+                    MainScreen(pagerState) { page ->
                         if (page == 0) HomeScreen()
-                        else BookmarkScreen()
+                        else BookmarkScreen(pagerState)
                     }
                 }
             }
@@ -64,11 +70,11 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    pageCount: Int,
+    pagerState: PagerState,
     pagerContent: @Composable (Int) -> Unit
 ) {
 
-    val pagerState = rememberPagerState { pageCount }
+
     val scope = rememberCoroutineScope()
     val page = remember {
         mutableIntStateOf(0)
@@ -112,12 +118,18 @@ fun MainScreen(
                         page = page,
                         onHomeClicked = {
                             scope.launch {
-                                pagerState.animateScrollToPage(0)
+                                pagerState.animateScrollToPage(
+                                    page = 0,
+                                    animationSpec = tween(durationMillis = 1000)
+                                    )
                             }
                         },
                         onBookmarkClicked = {
                             scope.launch {
-                                pagerState.animateScrollToPage(1)
+                                pagerState.animateScrollToPage(
+                                    page = 1,
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
                             }
                         }
                     )

@@ -1,6 +1,5 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.bookmark
 
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -17,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,10 +47,14 @@ import com.parsanasekhi.androidweatherapp.ui.theme.Orange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentBlack
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
+import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BookmarkScreen(
+    pagerState: PagerState,
     bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
 
@@ -58,7 +63,6 @@ fun BookmarkScreen(
     }
 
     val citiesWeather = bookmarkViewModel.citiesWeather
-    Log.i("TestLog", "BookmarkScreen: ${citiesWeather.toList()}")
 
     val scope = rememberCoroutineScope()
 
@@ -70,10 +74,20 @@ fun BookmarkScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(vertical = 8.dp, horizontal = 16.dp),
-            citiesWeather
-        ) { city ->
+            citiesWeather,
+            onDelete = { city ->
                 bookmarkViewModel.unbookmarkCity(city)
-        }
+            },
+            onClick = { city ->
+                cityFromBookmarkScreen.value = city
+                scope.launch {
+                    pagerState.animateScrollToPage(
+                        page = 0,
+                        animationSpec = tween(durationMillis = 1000)
+                    )
+                }
+            }
+        )
     }
 }
 
@@ -81,7 +95,8 @@ fun BookmarkScreen(
 fun BookmarkedListView(
     modifier: Modifier = Modifier,
     citiesWeather: SnapshotStateList<CurrentWeather>,
-    onDelete: (City) -> Unit
+    onDelete: (City) -> Unit,
+    onClick: (City) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -105,7 +120,8 @@ fun BookmarkedListView(
                     .fillMaxWidth()
                     .height(90.dp),
                 cityWeather = citiesWeather[index],
-                onDelete = onDelete
+                onDelete = onDelete,
+                onClick = onClick
             )
 
             LaunchedEffect(key1 = null) {
@@ -123,7 +139,8 @@ fun BookmarkedListView(
 fun BookmarkedView(
     modifier: Modifier = Modifier,
     cityWeather: CurrentWeather,
-    onDelete: (City) -> Unit
+    onDelete: (City) -> Unit,
+    onClick: (City) -> Unit
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = TransparentBlack),
@@ -133,7 +150,7 @@ fun BookmarkedView(
                     onDelete(City(cityWeather.cityName, cityWeather.cityId!!))
                 },
                 onClick = {
-
+                    onClick(City(cityWeather.cityName, cityWeather.cityId!!))
                 }
             ),
         shape = RoundedCornerShape(16.dp)
@@ -189,14 +206,20 @@ fun BookmarkedView(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Preview(showBackground = true)
 @Composable
 fun BookmarkScreenPreview() {
+
+    val pagerState = rememberPagerState {
+        1
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(), color = Color.Gray
     ) {
-        MainScreen(pageCount = 1) {
-            BookmarkScreen()
+        MainScreen(pagerState) {
+            BookmarkScreen(pagerState)
         }
     }
 }
