@@ -82,15 +82,6 @@ fun HomeScreen(
         mutableStateOf<Int?>(null)
     }
 
-    val scope = rememberCoroutineScope()
-
-    remember {
-        if (currentWeather.value.cityId != null)
-            scope.launch {
-                homeViewModel.checkIsCityBookmarked(currentWeather.value.cityId!!)
-            }
-    }
-
     if (cityFromBookmarkScreen.value != null) {
         homeViewModel.getWeatherByCityId(cityFromBookmarkScreen.value!!.id)
         cityFromBookmarkScreen.value = null
@@ -124,9 +115,6 @@ fun HomeScreen(
                 homeViewModel.bookmarkCity(city)
             else
                 homeViewModel.unbookmarkCity(city)
-            scope.launch {
-                homeViewModel.checkIsCityBookmarked(city.id)
-            }
         }
         ForecastWeatherListView(
             modifier = Modifier.fillMaxWidth(),
@@ -563,9 +551,9 @@ fun AboutCityPageView(
             Text(
                 text =
                 if (!isCityBookmarked.value)
-                    "bookmark this city"
+                    "bookmark city"
                 else
-                    "unbookmark the city",
+                    "unbookmark city",
                 fontSize = 16.sp
             )
         }

@@ -47,16 +47,18 @@ class HomeViewModel @Inject constructor(
     fun bookmarkCity(city: City) {
         viewModelScope.launch {
             bookmarkedCityRepository.insertCity(city)
+            _isCityBookmarked.value = true
         }
     }
 
     fun unbookmarkCity(city: City) {
         viewModelScope.launch {
             bookmarkedCityRepository.deleteCity(city)
+            _isCityBookmarked.value = false
         }
     }
 
-    suspend fun checkIsCityBookmarked(id: Int) {
+    private suspend fun checkIsCityBookmarked(id: Int) {
         bookmarkedCityRepository.checkCityExist(id)
             .collectLatest {
                 _isCityBookmarked.value = it
