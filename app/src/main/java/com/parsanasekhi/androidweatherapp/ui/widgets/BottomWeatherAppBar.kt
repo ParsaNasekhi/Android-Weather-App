@@ -27,6 +27,7 @@ import com.parsanasekhi.androidweatherapp.ui.theme.White
 fun BottomWeatherAppBar(
     modifier: Modifier = Modifier,
     page: MutableIntState,
+
     onHomeClicked: () -> Unit,
     onBookmarkClicked: () -> Unit,
 ) {
@@ -46,8 +47,12 @@ fun BottomWeatherAppBar(
                 Image(
                     imageVector = Icons.Filled.Home,
                     contentDescription = "Home Icon",
-                    modifier = Modifier.height(30.dp).wrapContentWidth(),
-                    colorFilter = if (page.intValue == 0) ColorFilter.tint(White) else ColorFilter.tint(TransparentWhite),
+                    modifier = Modifier
+                        .height(30.dp)
+                        .wrapContentWidth(),
+                    colorFilter = if (page.intValue == 0) ColorFilter.tint(White) else ColorFilter.tint(
+                        TransparentWhite
+                    ),
                     contentScale = ContentScale.FillHeight
                 )
             }
@@ -57,11 +62,15 @@ fun BottomWeatherAppBar(
             }) {
                 Image(
                     painter = painterResource(id = R.drawable.bookmark),
-                    modifier = Modifier.height(28.dp).wrapContentWidth(),
+                    modifier = Modifier
+                        .height(28.dp)
+                        .wrapContentWidth(),
                     contentDescription = "Bookmark Icon",
-                    colorFilter = if (page.intValue == 0) ColorFilter.tint(TransparentWhite) else ColorFilter.tint(White),
+                    colorFilter = if (page.intValue == 0) ColorFilter.tint(TransparentWhite) else ColorFilter.tint(
+                        White
+                    ),
                     contentScale = ContentScale.FillHeight
-                    )
+                )
             }
         }
     }

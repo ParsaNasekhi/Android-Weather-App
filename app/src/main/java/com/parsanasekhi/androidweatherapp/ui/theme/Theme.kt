@@ -13,10 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -65,13 +62,8 @@ fun AndroidWeatherAppTheme(
             WindowCompat.setDecorFitsSystemWindows(window, false)
             window.statusBarColor = Transparent.toArgb()
             window.navigationBarColor = TransparentBlack.toArgb()
-            ViewCompat.setOnApplyWindowInsetsListener(view) { view, windowInsets ->
-                val insets =
-                    windowInsets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
-                view.updatePadding(insets.left, insets.top, insets.right, insets.bottom)
-                WindowInsetsCompat.CONSUMED
-            }
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = true
         }
     }
 
