@@ -92,7 +92,7 @@ fun HomeScreen(
     }
 
     if (cityFromBookmarkScreen.value != null) {
-        homeViewModel.getCurrentWeatherByCityId(cityFromBookmarkScreen.value!!.id)
+        homeViewModel.getWeatherByCityId(cityFromBookmarkScreen.value!!.id)
         cityFromBookmarkScreen.value = null
     }
 

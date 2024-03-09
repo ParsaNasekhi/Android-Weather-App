@@ -93,7 +93,7 @@ class HomeViewModel @Inject constructor(
                 }
         }
     }
-    fun getCurrentWeatherByCityId(cityId: Int) {
+    fun getWeatherByCityId(cityId: Int) {
         viewModelScope.launch {
             weatherRepository.getCityWeatherById(cityId)
                 .onStart {
@@ -103,6 +103,7 @@ class HomeViewModel @Inject constructor(
                     Log.w("ManualLog", "getCurrentWeatherByCityId/catch: ${throwable.message}")
                 }.collectLatest { response ->
                     checkIsCityBookmarked(response.cityId!!)
+                    getForecastWeather(response.cityName, "5")
                     _currentWeather.value = response
 //                    _currentWeatherLoadState.value = LoadState.SUCCESS
                 }
