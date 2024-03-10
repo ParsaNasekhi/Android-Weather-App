@@ -6,6 +6,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -95,7 +96,7 @@ fun BookmarkScreen(
         BookmarkedListView(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(vertical = 8.dp, horizontal = 16.dp),
+                .padding(horizontal = 16.dp),
             citiesWeather,
             onDelete = { city ->
                 cityToDelete = city
@@ -195,6 +196,7 @@ fun BookmarkedListView(
 ) {
     LazyColumn(
         modifier = modifier,
+        contentPadding = PaddingValues(vertical = 8.dp)
     ) {
         items(citiesWeather.size) { index ->
 

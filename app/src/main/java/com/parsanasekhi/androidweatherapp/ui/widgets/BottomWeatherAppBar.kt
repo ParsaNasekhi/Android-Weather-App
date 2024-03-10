@@ -27,7 +27,6 @@ import com.parsanasekhi.androidweatherapp.ui.theme.White
 fun BottomWeatherAppBar(
     modifier: Modifier = Modifier,
     page: MutableIntState,
-
     onHomeClicked: () -> Unit,
     onBookmarkClicked: () -> Unit,
 ) {
