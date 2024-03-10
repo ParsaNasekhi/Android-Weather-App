@@ -1,5 +1,7 @@
 package com.parsanasekhi.androidweatherapp.ui
 
+import android.content.res.Configuration
+import android.graphics.drawable.GradientDrawable.Orientation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -103,6 +106,8 @@ fun MainScreen(
     val page = remember {
         mutableIntStateOf(0)
     }
+    val screenOrientation = LocalConfiguration.current.orientation
+    val isScreenPortrait = screenOrientation == Configuration.ORIENTATION_PORTRAIT
 
     Box(
         modifier = Modifier
@@ -146,15 +151,25 @@ fun MainScreen(
                             modifier = Modifier
                                 .background(
                                     brush = Brush.verticalGradient(
-                                        colors = listOf(
-                                            Transparent,
-                                            Black.copy(alpha = 0.2f),
-                                            Black.copy(alpha = 0.3f),
-                                            Black.copy(alpha = 0.4f),
-                                            Black.copy(alpha = 0.5f),
-                                            Black.copy(alpha = 0.6f),
-                                            Black.copy(alpha = 0.8f),
-                                        ),
+                                        colors =
+                                        if (isScreenPortrait)
+                                            listOf(
+                                                Transparent,
+                                                Black.copy(alpha = 0.2f),
+                                                Black.copy(alpha = 0.3f),
+                                                Black.copy(alpha = 0.4f),
+                                                Black.copy(alpha = 0.5f),
+                                                Black.copy(alpha = 0.6f),
+                                                Black.copy(alpha = 0.7f),
+                                                Black.copy(alpha = 0.8f),
+                                            )
+                                        else
+                                            listOf(
+                                                Transparent,
+                                                Black.copy(alpha = 0.3f),
+                                                Black.copy(alpha = 0.6f),
+                                                Black.copy(alpha = 0.9f),
+                                            )
                                     )
                                 ),
                             page = page,
