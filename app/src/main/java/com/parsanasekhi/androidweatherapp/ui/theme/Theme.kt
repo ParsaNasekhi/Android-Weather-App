@@ -63,7 +63,7 @@ fun AndroidWeatherAppTheme(
             window.statusBarColor = TransparentBlack.toArgb()
             window.navigationBarColor = TransparentBlack.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = true
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
         }
     }
 
