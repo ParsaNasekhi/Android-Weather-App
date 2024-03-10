@@ -64,7 +64,7 @@ import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
-import com.parsanasekhi.androidweatherapp.utills.needToCheckBookmark
+import com.parsanasekhi.androidweatherapp.utills.removeCityEvent
 import kotlinx.coroutines.launch
 
 @Composable
@@ -90,8 +90,8 @@ fun HomeScreen(
         cityFromBookmarkScreen.value = null
     }
 
-    if (needToCheckBookmark.value) {
-        needToCheckBookmark.value = false
+    if (removeCityEvent.value) {
+        removeCityEvent.value = false
         coroutineScope.launch {
             homeViewModel.checkIsCityBookmarked(currentWeather.value.cityId!!)
         }
