@@ -58,7 +58,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private suspend fun checkIsCityBookmarked(id: Int) {
+    suspend fun checkIsCityBookmarked(id: Int) {
         bookmarkedCityRepository.checkCityExist(id)
             .collectLatest {
                 _isCityBookmarked.value = it

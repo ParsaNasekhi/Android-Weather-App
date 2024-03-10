@@ -12,3 +12,4 @@ val EmptyCurrentWeather =
     CurrentWeather("", EmptyLocation, null, "", "", "", "", "", "", "", "", "", "", "", "")
 
 val cityFromBookmarkScreen = mutableStateOf<City?>(null)
+val needToCheckBookmark = mutableStateOf(false)

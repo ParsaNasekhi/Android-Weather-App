@@ -57,6 +57,7 @@ import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
+import com.parsanasekhi.androidweatherapp.utills.needToCheckBookmark
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -81,9 +82,10 @@ fun BookmarkScreen(
     var cityToDelete: City? = null
 
     ShowAlertDialog(dialogState) {
-        dialogState.value = false
         bookmarkViewModel.unbookmarkCity(cityToDelete!!)
+        needToCheckBookmark.value = true
         cityToDelete = null
+        dialogState.value = false
     }
 
     Column(
