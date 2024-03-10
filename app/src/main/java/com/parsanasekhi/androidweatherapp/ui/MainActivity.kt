@@ -7,15 +7,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -27,6 +26,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
@@ -40,6 +40,7 @@ import com.parsanasekhi.androidweatherapp.R
 import com.parsanasekhi.androidweatherapp.ui.screens.bookmark.BookmarkScreen
 import com.parsanasekhi.androidweatherapp.ui.screens.home.HomeScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.AndroidWeatherAppTheme
+import com.parsanasekhi.androidweatherapp.ui.theme.Black
 import com.parsanasekhi.androidweatherapp.ui.theme.Transparent
 import com.parsanasekhi.androidweatherapp.ui.widgets.BottomWeatherAppBar
 import dagger.hilt.android.AndroidEntryPoint
@@ -115,54 +116,67 @@ fun MainScreen(
         )
         Scaffold(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            bottomBar = {
-                Column {
-                    BottomWeatherAppBar(
-                        page = page,
-                        onHomeClicked = {
-                            scope.launch {
-                                pagerState.animateScrollToPage(
-                                    page = 0,
-                                    animationSpec = tween(durationMillis = 1000)
-                                )
-                            }
-                        },
-                        onBookmarkClicked = {
-                            scope.launch {
-                                pagerState.animateScrollToPage(
-                                    page = 1,
-                                    animationSpec = tween(durationMillis = 1000)
-                                )
-                            }
-                        }
-                    )
-                }
-            },
+                .fillMaxSize(),
             containerColor = Transparent
         ) { innerPadding ->
             Column(
                 modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxWidth()
-                    .fillMaxHeight()
+                    .fillMaxSize()
             ) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.fillMaxHeight()
-                ) { newPage ->
-                    if (newPage == pagerState.currentPage)
-                        page.intValue = newPage
-                    pagerContent(newPage)
-                }
-                Column(
+                Box(
                     modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Bottom
+                        .fillMaxSize()
                 ) {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .padding(innerPadding)
+                    ) { newPage ->
+                        if (newPage == pagerState.currentPage)
+                            page.intValue = newPage
+                        pagerContent(newPage)
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        BottomWeatherAppBar(
+                            modifier = Modifier
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            Transparent,
+                                            Black.copy(alpha = 0.2f),
+                                            Black.copy(alpha = 0.3f),
+                                            Black.copy(alpha = 0.4f),
+                                            Black.copy(alpha = 0.5f),
+                                            Black.copy(alpha = 0.6f),
+                                            Black.copy(alpha = 0.8f),
+                                        ),
+                                    )
+                                ),
+                            page = page,
+                            onHomeClicked = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(
+                                        page = 0,
+                                        animationSpec = tween(durationMillis = 1000)
+                                    )
+                                }
+                            },
+                            onBookmarkClicked = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(
+                                        page = 1,
+                                        animationSpec = tween(durationMillis = 1000)
+                                    )
+                                }
+                            }
+                        )
+                    }
                 }
-
             }
         }
     }
