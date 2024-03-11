@@ -57,6 +57,7 @@ import com.parsanasekhi.androidweatherapp.ui.theme.TransparentBlack
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
+import com.parsanasekhi.androidweatherapp.utills.BottomAppBarHeight
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
 import com.parsanasekhi.androidweatherapp.utills.removeCityEvent
 import kotlinx.coroutines.delay
@@ -196,7 +197,11 @@ fun BookmarkedListView(
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(vertical = 8.dp)
+        contentPadding = PaddingValues(
+            start = 8.dp,
+            end = 8.dp,
+            bottom = BottomAppBarHeight.dp
+        )
     ) {
         items(citiesWeather.size) { index ->
 

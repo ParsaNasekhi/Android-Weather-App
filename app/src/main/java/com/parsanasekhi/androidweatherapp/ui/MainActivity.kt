@@ -45,6 +45,7 @@ import com.parsanasekhi.androidweatherapp.ui.theme.AndroidWeatherAppTheme
 import com.parsanasekhi.androidweatherapp.ui.theme.Black
 import com.parsanasekhi.androidweatherapp.ui.theme.Transparent
 import com.parsanasekhi.androidweatherapp.ui.widgets.BottomWeatherAppBar
+import com.parsanasekhi.androidweatherapp.utills.BottomAppBarHeight
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -145,7 +146,7 @@ fun MainScreen(
                     ) {
                         BottomWeatherAppBar(
                             modifier = Modifier
-                                .height(100.dp)
+                                .height(BottomAppBarHeight.dp)
                                 .background(
                                     brush = Brush.verticalGradient(
                                         colors = listOf(

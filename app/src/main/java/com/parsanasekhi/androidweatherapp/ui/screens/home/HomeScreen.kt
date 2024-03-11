@@ -63,6 +63,7 @@ import com.parsanasekhi.androidweatherapp.ui.theme.TransparentBlack
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
+import com.parsanasekhi.androidweatherapp.utills.BottomAppBarHeight
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
 import com.parsanasekhi.androidweatherapp.utills.removeCityEvent
@@ -101,7 +102,10 @@ fun HomeScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 16.dp),
+            .padding(
+                top = 16.dp,
+                bottom = BottomAppBarHeight.dp
+                ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
