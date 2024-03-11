@@ -101,11 +101,11 @@ fun HomeScreen(
 
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
             .padding(
                 top = 16.dp,
                 bottom = BottomAppBarHeight.dp
-                ),
+                )
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
