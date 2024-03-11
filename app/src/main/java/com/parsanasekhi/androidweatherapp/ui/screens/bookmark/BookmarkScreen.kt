@@ -281,6 +281,8 @@ fun BookmarkedView(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxHeight()
+                    .weight(1f)
+                    .padding(end = 16.dp)
             ) {
                 Text(
                     text = cityWeather.cityName,
@@ -289,7 +291,6 @@ fun BookmarkedView(
                     fontWeight = FontWeight.Bold,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
-                    modifier = Modifier.padding(end = 16.dp)
                 )
                 Text(
                     text = cityWeather.description,
@@ -297,19 +298,18 @@ fun BookmarkedView(
                     fontSize = 16.sp,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
-                    modifier = Modifier.padding(end = 16.dp)
+                    modifier = Modifier
                 )
             }
             Row(
-                modifier = Modifier
-                    .weight(1f),
                 horizontalArrangement = Arrangement.End
             ) {
                 Text(
                     text = cityWeather.temp,
                     color = Orange,
                     fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
                 )
             }
         }
