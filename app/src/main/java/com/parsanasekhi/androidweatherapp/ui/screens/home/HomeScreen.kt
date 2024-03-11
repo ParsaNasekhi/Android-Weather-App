@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -97,50 +98,52 @@ fun HomeScreen(
         }
     }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SearchCityView(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp), text = cityName
-        ) { newText ->
-            clickedForecastItem.value = null
-            cityName.value = newText
-            homeViewModel.getCurrentWeather(cityName.value)
-            homeViewModel.getForecastWeather(cityName.value, "5")
+        item {
+            SearchCityView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp), text = cityName
+            ) { newText ->
+                clickedForecastItem.value = null
+                cityName.value = newText
+                homeViewModel.getCurrentWeather(cityName.value)
+                homeViewModel.getForecastWeather(cityName.value, "5")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            HomePagerView(
+                modifier = Modifier.fillMaxWidth(),
+                currentWeather = currentWeather,
+                forecastWeather = forecastWeather,
+                clickedForecastItem = clickedForecastItem,
+                isCityBookmarked = isCityBookmarked
+            ) { city ->
+                if (!isCityBookmarked.value)
+                    homeViewModel.bookmarkCity(city)
+                else
+                    homeViewModel.unbookmarkCity(city)
+            }
+            ForecastWeatherListView(
+                modifier = Modifier.fillMaxWidth(),
+                currentWeather = currentWeather,
+                forecastWeather = forecastWeather,
+                clickedForecastItem = clickedForecastItem
+            ) { dayNum ->
+                clickedForecastItem.value = dayNum
+            }
+            MoreInfoView(
+                modifier = Modifier.fillMaxWidth(),
+                currentWeather = currentWeather,
+                forecastWeather = forecastWeather,
+                clickedForecastItem = clickedForecastItem,
+                homeViewModel = homeViewModel
+            )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        HomePagerView(
-            modifier = Modifier.fillMaxWidth(),
-            currentWeather = currentWeather,
-            forecastWeather = forecastWeather,
-            clickedForecastItem = clickedForecastItem,
-            isCityBookmarked = isCityBookmarked
-        ) { city ->
-            if (!isCityBookmarked.value)
-                homeViewModel.bookmarkCity(city)
-            else
-                homeViewModel.unbookmarkCity(city)
-        }
-        ForecastWeatherListView(
-            modifier = Modifier.fillMaxWidth(),
-            currentWeather = currentWeather,
-            forecastWeather = forecastWeather,
-            clickedForecastItem = clickedForecastItem
-        ) { dayNum ->
-            clickedForecastItem.value = dayNum
-        }
-        MoreInfoView(
-            modifier = Modifier.fillMaxWidth(),
-            currentWeather = currentWeather,
-            forecastWeather = forecastWeather,
-            clickedForecastItem = clickedForecastItem,
-            homeViewModel = homeViewModel
-        )
     }
 }
 

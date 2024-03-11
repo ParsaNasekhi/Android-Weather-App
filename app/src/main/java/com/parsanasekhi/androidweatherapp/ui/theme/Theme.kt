@@ -61,7 +61,7 @@ fun AndroidWeatherAppTheme(
             val window = (view.context as Activity).window
             WindowCompat.setDecorFitsSystemWindows(window, false)
             window.statusBarColor = TransparentBlack.toArgb()
-            window.navigationBarColor = Transparent.toArgb()
+            window.navigationBarColor = Black.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
             WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
         }
