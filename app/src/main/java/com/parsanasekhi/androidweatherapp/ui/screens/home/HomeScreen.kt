@@ -143,7 +143,6 @@ fun HomeScreen(
                 currentWeather = currentWeather,
                 forecastWeather = forecastWeather,
                 clickedForecastItem = clickedForecastItem,
-                homeViewModel = homeViewModel
             )
         }
     }
@@ -180,7 +179,6 @@ private fun MoreInfoView(
     currentWeather: State<CurrentWeather>,
     forecastWeather: State<List<ForecastWeather.Detail>>,
     clickedForecastItem: MutableState<Int?>,
-    homeViewModel: HomeViewModel
 ) {
     Row(
         modifier = modifier,

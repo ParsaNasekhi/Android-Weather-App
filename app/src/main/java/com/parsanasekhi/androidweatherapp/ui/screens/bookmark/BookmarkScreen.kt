@@ -52,6 +52,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.parsanasekhi.androidweatherapp.data.City
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
+import com.parsanasekhi.androidweatherapp.ui.theme.Black
 import com.parsanasekhi.androidweatherapp.ui.theme.Orange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentBlack
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
@@ -124,7 +125,7 @@ fun ShowAlertDialog(
     if (dialogState.value) {
         AlertDialog(
             shape = RoundedCornerShape(16.dp),
-            containerColor = TransparentBlack,
+            containerColor = Black.copy(0.9f),
             onDismissRequest = {
                 dialogState.value = false
             },
