@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -585,12 +586,18 @@ fun AboutCityItemView(
         Text(
             text = "$title:",
             color = TransparentWhite,
-            fontSize = 16.sp
+            fontSize = 16.sp,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            modifier = Modifier.padding(end = 16.dp)
         )
         Text(
             text = value,
             color = White,
-            fontSize = 16.sp
+            fontSize = 16.sp,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            modifier = Modifier.padding(end = 16.dp)
         )
     }
 }
@@ -611,7 +618,10 @@ private fun CurrentWeatherPageView(
             text = currentWeather.value.cityName,
             color = White,
             fontSize = 32.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -622,6 +632,9 @@ private fun CurrentWeatherPageView(
                 forecastWeather.value[clickedForecastItem.value!!].description,
             color = TransparentWhite,
             fontSize = 24.sp,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(14.dp))
         if (currentWeather.value.icon.isNotEmpty())
