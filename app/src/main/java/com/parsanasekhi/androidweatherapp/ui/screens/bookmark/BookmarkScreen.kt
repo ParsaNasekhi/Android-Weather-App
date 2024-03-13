@@ -150,7 +150,7 @@ fun ShowAlertDialog(
                         onConfirm()
                     },
                     colors = ButtonColors(
-                        containerColor = TransparentBlack,
+                        containerColor = White.copy(0.1f),
                         contentColor = White,
                         disabledContainerColor = TransparentBlack,
                         disabledContentColor = Orange
@@ -234,7 +234,6 @@ fun BookmarkedListView(
             }
         }
     }
-
 
 }
 

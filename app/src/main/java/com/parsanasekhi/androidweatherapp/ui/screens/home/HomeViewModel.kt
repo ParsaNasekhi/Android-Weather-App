@@ -95,6 +95,7 @@ class HomeViewModel @Inject constructor(
                 }
         }
     }
+
     fun getWeatherByCityId(cityId: Int) {
         viewModelScope.launch {
             weatherRepository.getCityWeatherById(cityId)
