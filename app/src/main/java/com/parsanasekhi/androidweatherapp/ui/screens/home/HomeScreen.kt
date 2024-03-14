@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.Placeholder
 import com.parsanasekhi.androidweatherapp.data.City
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
@@ -64,8 +65,10 @@ import com.parsanasekhi.androidweatherapp.ui.theme.TransparentBlack
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
+import com.parsanasekhi.androidweatherapp.ui.widgets.LoadingCircleView
 import com.parsanasekhi.androidweatherapp.utills.BottomAppBarHeight
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
+import com.parsanasekhi.androidweatherapp.utills.LoadState
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
 import com.parsanasekhi.androidweatherapp.utills.removeCityEvent
 import kotlinx.coroutines.launch
@@ -76,7 +79,11 @@ fun HomeScreen(
 ) {
 
     val currentWeather = homeViewModel.currentWeather.collectAsState()
+    val currentWeatherLoadState = homeViewModel.currentWeatherLoadState.collectAsState()
+
     val forecastWeather = homeViewModel.forecastWeather.collectAsState()
+    val forecastWeatherLoadState = homeViewModel.forecastWeatherLoadState.collectAsState()
+
     val isCityBookmarked = homeViewModel.isCityBookmarked.collectAsState()
 
     val cityName = remember {
@@ -124,7 +131,8 @@ fun HomeScreen(
                 currentWeather = currentWeather,
                 forecastWeather = forecastWeather,
                 clickedForecastItem = clickedForecastItem,
-                isCityBookmarked = isCityBookmarked
+                isCityBookmarked = isCityBookmarked,
+                currentWeatherLoadState = currentWeatherLoadState
             ) { city ->
                 if (!isCityBookmarked.value)
                     homeViewModel.bookmarkCity(city)
@@ -135,7 +143,9 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 currentWeather = currentWeather,
                 forecastWeather = forecastWeather,
-                clickedForecastItem = clickedForecastItem
+                clickedForecastItem = clickedForecastItem,
+                currentWeatherLoadState = currentWeatherLoadState,
+                forecastWeatherLoadState = forecastWeatherLoadState
             ) { dayNum ->
                 clickedForecastItem.value = dayNum
             }
@@ -272,6 +282,8 @@ private fun ForecastWeatherListView(
     currentWeather: State<CurrentWeather>,
     forecastWeather: State<List<ForecastWeather.Detail>>,
     clickedForecastItem: MutableState<Int?>,
+    currentWeatherLoadState: State<LoadState>,
+    forecastWeatherLoadState: State<LoadState>,
     onItemClicked: (Int?) -> Unit
 ) {
 
@@ -315,11 +327,24 @@ private fun ForecastWeatherListView(
                             fontSize = 12.sp,
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        GlideImage(
-                            model = currentWeather.value.icon,
-                            contentDescription = "Forecast Weather Icon",
-                            modifier = Modifier.size(48.dp),
-                        )
+                        if (currentWeatherLoadState.value == LoadState.SUCCESS)
+                            GlideImage(
+                                model = currentWeather.value.icon,
+                                contentDescription = "Forecast Weather Icon",
+                                modifier = Modifier.size(48.dp),
+                            )
+                        else if (forecastWeatherLoadState.value == LoadState.EMPTY || forecastWeatherLoadState.value == LoadState.ERROR)
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                contentDescription = "Weather Icon",
+                                tint = White,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        else
+                            LoadingCircleView(
+                                display = true,
+                                modifier = Modifier.size(48.dp)
+                            )
                         Text(
                             text = currentWeather.value.temp,
                             color = White,
@@ -332,7 +357,8 @@ private fun ForecastWeatherListView(
                     dayNum = dayNum,
                     clickedForecastItem = clickedForecastItem,
                     forecastWeather = forecastWeather,
-                    onItemClicked = onItemClicked
+                    onItemClicked = onItemClicked,
+                    forecastWeatherLoadState
                 )
             }
         }
@@ -352,7 +378,8 @@ fun ForecastWeatherItemView(
     dayNum: Int,
     clickedForecastItem: MutableState<Int?>,
     forecastWeather: State<List<ForecastWeather.Detail>>,
-    onItemClicked: (Int) -> Unit
+    onItemClicked: (Int) -> Unit,
+    forecastWeatherLoadState: State<LoadState>
 ) {
     Column(
         modifier = Modifier
@@ -374,19 +401,25 @@ fun ForecastWeatherItemView(
             fontSize = 12.sp,
         )
         Spacer(modifier = Modifier.height(4.dp))
-        if (forecastWeather.value[dayNum].icon.isNotEmpty())
-            GlideImage(
+        when (forecastWeatherLoadState.value) {
+            LoadState.SUCCESS -> GlideImage(
                 model = forecastWeather.value[dayNum].icon,
                 contentDescription = "Forecast Weather Icon",
                 modifier = Modifier.size(48.dp),
             )
-        else
-            Icon(
+
+            LoadState.EMPTY, LoadState.ERROR -> Icon(
                 imageVector = Icons.Outlined.Info,
                 contentDescription = "Weather Icon",
                 tint = White,
                 modifier = Modifier.size(48.dp)
             )
+
+            else -> LoadingCircleView(
+                display = true,
+                modifier = Modifier.size(48.dp)
+            )
+        }
         Text(
             text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].temp else "",
             color = White,
@@ -403,6 +436,7 @@ private fun HomePagerView(
     forecastWeather: State<List<ForecastWeather.Detail>>,
     clickedForecastItem: MutableState<Int?>,
     isCityBookmarked: State<Boolean>,
+    currentWeatherLoadState: State<LoadState>,
     onBookmark: (City) -> Unit
 ) {
 
@@ -425,7 +459,8 @@ private fun HomePagerView(
                         .fillMaxHeight(),
                     currentWeather = currentWeather,
                     forecastWeather = forecastWeather,
-                    clickedForecastItem = clickedForecastItem
+                    clickedForecastItem = clickedForecastItem,
+                    currentWeatherLoadState
                 )
             else
                 AboutCityPageView(
@@ -608,7 +643,8 @@ private fun CurrentWeatherPageView(
     modifier: Modifier = Modifier,
     currentWeather: State<CurrentWeather>,
     forecastWeather: State<List<ForecastWeather.Detail>>,
-    clickedForecastItem: MutableState<Int?>
+    clickedForecastItem: MutableState<Int?>,
+    currentWeatherLoadState: State<LoadState>
 ) {
     Column(
         modifier = modifier,
@@ -637,8 +673,8 @@ private fun CurrentWeatherPageView(
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(14.dp))
-        if (currentWeather.value.icon.isNotEmpty())
-            GlideImage(
+        when (currentWeatherLoadState.value) {
+            LoadState.SUCCESS -> GlideImage(
                 model =
                 if (clickedForecastItem.value == null)
                     currentWeather.value.icon
@@ -647,12 +683,19 @@ private fun CurrentWeatherPageView(
                 contentDescription = "Current Weather Icon",
                 modifier = Modifier.size(100.dp),
             )
-        else Icon(
-            imageVector = Icons.Outlined.Info,
-            contentDescription = "Weather Icon",
-            tint = TransparentWhite,
-            modifier = Modifier.size(100.dp)
-        )
+
+            LoadState.EMPTY, LoadState.ERROR -> Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = "Weather Icon",
+                tint = TransparentWhite,
+                modifier = Modifier.size(100.dp)
+            )
+
+            else -> LoadingCircleView(
+                display = true,
+                modifier = Modifier.size(100.dp)
+            )
+        }
         Text(
             text =
             if (clickedForecastItem.value == null)

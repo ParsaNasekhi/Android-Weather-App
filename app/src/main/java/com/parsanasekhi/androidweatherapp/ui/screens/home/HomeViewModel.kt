@@ -11,6 +11,7 @@ import com.parsanasekhi.androidweatherapp.repository.weather.WeatherRepository
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
 import com.parsanasekhi.androidweatherapp.utills.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -75,6 +76,7 @@ class HomeViewModel @Inject constructor(
                     Log.w("ManualLog", "getForecastWeather/catch: ${throwable.message}")
                 }.collectLatest { forecastWeather ->
                     _forecastWeather.value = forecastWeather.toList()
+                    delay(1500)
                     _forecastWeatherLoadState.value = LoadState.SUCCESS
                 }
         }
@@ -91,6 +93,7 @@ class HomeViewModel @Inject constructor(
                 }.collectLatest { response ->
                     checkIsCityBookmarked(response.cityId!!)
                     _currentWeather.value = response
+                    delay(1500)
                     _currentWeatherLoadState.value = LoadState.SUCCESS
                 }
         }
@@ -100,15 +103,16 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             weatherRepository.getCityWeatherById(cityId)
                 .onStart {
-//                    _currentWeatherLoadState.value = LoadState.LOADING
+                    _currentWeatherLoadState.value = LoadState.LOADING
                 }.catch { throwable ->
-//                    _currentWeatherLoadState.value = LoadState.ERROR
+                    _currentWeatherLoadState.value = LoadState.ERROR
                     Log.w("ManualLog", "getCurrentWeatherByCityId/catch: ${throwable.message}")
                 }.collectLatest { response ->
                     checkIsCityBookmarked(response.cityId!!)
                     getForecastWeather(response.cityName, "5")
                     _currentWeather.value = response
-//                    _currentWeatherLoadState.value = LoadState.SUCCESS
+                    delay(1500)
+                    _currentWeatherLoadState.value = LoadState.SUCCESS
                 }
         }
     }

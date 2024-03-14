@@ -54,6 +54,15 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        /*
+
+        1- loading (circle progress bar + shimmer effect)
+        2- splash (compose navigation + splash screen)
+        3- map (map api + bottom sheet)
+
+         */
+
         enableEdgeToEdge()
         setContent {
             AndroidWeatherAppTheme {
