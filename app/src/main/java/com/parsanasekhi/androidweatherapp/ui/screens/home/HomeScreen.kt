@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -68,8 +69,10 @@ import com.parsanasekhi.androidweatherapp.ui.theme.White
 import com.parsanasekhi.androidweatherapp.ui.widgets.LoadingCircleView
 import com.parsanasekhi.androidweatherapp.utills.BottomAppBarHeight
 import com.parsanasekhi.androidweatherapp.utills.LoadState
+import com.parsanasekhi.androidweatherapp.utills.check
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
 import com.parsanasekhi.androidweatherapp.utills.removeCityEvent
+import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 
 @Composable
@@ -122,8 +125,8 @@ fun HomeScreen(
             ) { newText ->
                 clickedForecastItem.value = null
                 cityName.value = newText
-                homeViewModel.getCurrentWeather(cityName.value)
-                homeViewModel.getForecastWeather(cityName.value, "5")
+                homeViewModel.getCurrentWeather(newText)
+                homeViewModel.getForecastWeather(newText, "5")
             }
             Spacer(modifier = Modifier.height(16.dp))
             HomePagerView(
@@ -154,6 +157,7 @@ fun HomeScreen(
                 currentWeather = currentWeather,
                 forecastWeather = forecastWeather,
                 clickedForecastItem = clickedForecastItem,
+                currentWeatherLoadState = currentWeatherLoadState
             )
         }
     }
@@ -190,19 +194,26 @@ private fun MoreInfoView(
     currentWeather: State<CurrentWeather>,
     forecastWeather: State<List<ForecastWeather.Detail>>,
     clickedForecastItem: MutableState<Int?>,
+    currentWeatherLoadState: State<LoadState>
 ) {
     Row(
-        modifier = modifier,
+        modifier = currentWeatherLoadState.value.check(
+            successContent = modifier,
+            loadingContent = modifier.shimmer(),
+            elseContent = modifier.alpha(0.5f)
+        )!!,
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         MoreInfoItem(
             title = "wind",
-            value =
-            if (clickedForecastItem.value == null)
-                currentWeather.value.windSpeed
-            else
-                forecastWeather.value[clickedForecastItem.value!!].windSpeed
+            value = currentWeatherLoadState.value.check(
+                successContent = if (clickedForecastItem.value == null)
+                    currentWeather.value.windSpeed
+                else
+                    forecastWeather.value[clickedForecastItem.value!!].windSpeed,
+                elseContent = ""
+            )!!
         )
         Spacer(
             modifier = Modifier
@@ -213,11 +224,13 @@ private fun MoreInfoView(
         )
         MoreInfoItem(
             title = "humidity",
-            value =
-            if (clickedForecastItem.value == null)
-                currentWeather.value.humidity
-            else
-                forecastWeather.value[clickedForecastItem.value!!].humidity
+            value = currentWeatherLoadState.value.check(
+                successContent = if (clickedForecastItem.value == null)
+                    currentWeather.value.humidity
+                else
+                    forecastWeather.value[clickedForecastItem.value!!].humidity,
+                elseContent = ""
+            )!!
         )
         Spacer(
             modifier = Modifier
@@ -228,11 +241,13 @@ private fun MoreInfoView(
         )
         MoreInfoItem(
             title = "sunrise",
-            value =
-            if (clickedForecastItem.value == null)
-                currentWeather.value.sunrise
-            else
-                forecastWeather.value[clickedForecastItem.value!!].sunrise
+            value = currentWeatherLoadState.value.check(
+                successContent = if (clickedForecastItem.value == null)
+                    currentWeather.value.sunrise
+                else
+                    forecastWeather.value[clickedForecastItem.value!!].sunrise,
+                elseContent = ""
+            )!!
         )
         Spacer(
             modifier = Modifier
@@ -243,11 +258,13 @@ private fun MoreInfoView(
         )
         MoreInfoItem(
             title = "sunset",
-            value =
-            if (clickedForecastItem.value == null)
-                currentWeather.value.sunset
-            else
-                forecastWeather.value[clickedForecastItem.value!!].sunset
+            value = currentWeatherLoadState.value.check(
+                successContent = if (clickedForecastItem.value == null)
+                    currentWeather.value.sunset
+                else
+                    forecastWeather.value[clickedForecastItem.value!!].sunset,
+                elseContent = ""
+            )!!
         )
     }
 }
@@ -316,30 +333,59 @@ private fun ForecastWeatherListView(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Today",
-                        color = White,
+                        text = currentWeatherLoadState.value.check(
+                            successContent = "Today",
+                            elseContent = "Text"
+                        )!!,
+                        color = currentWeatherLoadState.value.check(
+                            successContent = White,
+                            elseContent = Transparent
+                        )!!,
                         fontSize = 12.sp,
                     )
                     Text(
-                        text = "Right Now",
-                        color = TransparentWhite,
+                        text = currentWeatherLoadState.value.check(
+                            successContent = "Right Now",
+                            elseContent = "Text"
+                        )!!,
+                        color = currentWeatherLoadState.value.check(
+                            successContent = TransparentWhite,
+                            elseContent = Transparent
+                        )!!,
                         fontSize = 12.sp,
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    if (currentWeatherLoadState.value == LoadState.LOADING)
-                        LoadingCircleView(
-                            display = true,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    else
-                        GlideImage(
-                            model = currentWeather.value.icon,
-                            contentDescription = "Forecast Weather Icon",
-                            modifier = Modifier.size(48.dp),
-                        )
+                    when (currentWeatherLoadState.value) {
+                        LoadState.LOADING ->
+                            LoadingCircleView(
+                                display = true,
+                                modifier = Modifier.size(48.dp)
+                            )
+
+                        LoadState.SUCCESS ->
+                            GlideImage(
+                                model = currentWeather.value.icon,
+                                contentDescription = "Forecast Weather Icon",
+                                modifier = Modifier.size(48.dp),
+                            )
+
+                        else ->
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                contentDescription = "Weather Icon",
+                                tint = TransparentBlack,
+                                modifier = Modifier.size(48.dp)
+                            )
+                    }
                     Text(
-                        text = currentWeather.value.temp,
-                        color = White,
+                        text = currentWeatherLoadState.value.check(
+                            successContent = currentWeather.value.temp,
+                            elseContent = "Text"
+                        )!!,
+                        color = currentWeatherLoadState.value.check(
+                            successContent = White,
+                            elseContent = Transparent
+                        )!!,
                         fontSize = 16.sp,
                     )
                 }
@@ -383,19 +429,25 @@ fun ForecastWeatherItemView(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text =
-            if (forecastWeather.value.isNotEmpty())
-                forecastWeather.value[dayNum].date
-            else "",
-            color = White,
+            text = forecastWeatherLoadState.value.check(
+                successContent = forecastWeather.value[dayNum].date,
+                elseContent = "Text"
+            )!!,
+            color = forecastWeatherLoadState.value.check(
+                successContent = White,
+                elseContent = Transparent
+            )!!,
             fontSize = 12.sp,
         )
         Text(
-            text =
-            if (forecastWeather.value.isNotEmpty())
-                forecastWeather.value[dayNum].time
-            else "",
-            color = TransparentWhite,
+            text = forecastWeatherLoadState.value.check(
+                successContent = forecastWeather.value[dayNum].time,
+                elseContent = "Text"
+            )!!,
+            color = forecastWeatherLoadState.value.check(
+                successContent = TransparentWhite,
+                elseContent = Transparent
+            )!!,
             fontSize = 12.sp,
         )
         Spacer(modifier = Modifier.height(4.dp))
@@ -406,16 +458,30 @@ fun ForecastWeatherItemView(
                     modifier = Modifier.size(48.dp)
                 )
 
-            else ->
+            LoadState.SUCCESS ->
                 GlideImage(
                     model = forecastWeather.value[dayNum].icon,
                     contentDescription = "Forecast Weather Icon",
                     modifier = Modifier.size(48.dp),
                 )
+
+            else ->
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "Weather Icon",
+                    tint = TransparentBlack,
+                    modifier = Modifier.size(48.dp)
+                )
         }
         Text(
-            text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].temp else "",
-            color = White,
+            text = forecastWeatherLoadState.value.check(
+                successContent = forecastWeather.value[dayNum].temp,
+                elseContent = "Text"
+            )!!,
+            color = forecastWeatherLoadState.value.check(
+                successContent = White,
+                elseContent = Transparent
+            )!!,
             fontSize = 16.sp,
         )
     }
@@ -463,7 +529,8 @@ private fun HomePagerView(
                         .fillMaxSize(),
                     currentWeather = currentWeather,
                     onBookmark = onBookmark,
-                    isCityBookmarked = isCityBookmarked
+                    isCityBookmarked = isCityBookmarked,
+                    currentWeatherLoadState = currentWeatherLoadState
                 )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -508,7 +575,8 @@ fun AboutCityPageView(
     modifier: Modifier = Modifier,
     currentWeather: State<CurrentWeather>,
     onBookmark: (City) -> Unit,
-    isCityBookmarked: State<Boolean>
+    isCityBookmarked: State<Boolean>,
+    currentWeatherLoadState: State<LoadState>
 ) {
 
     val spacerHeight = 16.dp
@@ -518,10 +586,22 @@ fun AboutCityPageView(
         verticalArrangement = Arrangement.Center
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .weight(1f),
+            modifier = currentWeatherLoadState.value.check(
+                successContent = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .weight(1f),
+                elseContent = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .weight(1f)
+                    .alpha(0.5f),
+                loadingContent = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .weight(1f)
+                    .shimmer()
+            )!!,
             horizontalArrangement = Arrangement.Center
         ) {
             Column(
@@ -534,17 +614,26 @@ fun AboutCityPageView(
             ) {
                 AboutCityItemView(
                     title = "City",
-                    value = currentWeather.value.cityName
+                    value = currentWeatherLoadState.value.check(
+                        successContent = currentWeather.value.cityName,
+                        elseContent = ""
+                    )!!
                 )
                 Spacer(modifier = Modifier.height(spacerHeight))
                 AboutCityItemView(
                     title = "Date",
-                    value = currentWeather.value.date
+                    value = currentWeatherLoadState.value.check(
+                        successContent = currentWeather.value.date,
+                        elseContent = ""
+                    )!!
                 )
                 Spacer(modifier = Modifier.height(spacerHeight))
                 AboutCityItemView(
                     title = "Latitude",
-                    value = currentWeather.value.location.lat
+                    value = currentWeatherLoadState.value.check(
+                        successContent = currentWeather.value.location.lat,
+                        elseContent = ""
+                    )!!
                 )
             }
             Column(
@@ -557,17 +646,26 @@ fun AboutCityPageView(
             ) {
                 AboutCityItemView(
                     title = "Country",
-                    value = currentWeather.value.country
+                    value = currentWeatherLoadState.value.check(
+                        successContent = currentWeather.value.country,
+                        elseContent = ""
+                    )!!
                 )
                 Spacer(modifier = Modifier.height(spacerHeight))
                 AboutCityItemView(
                     title = "Time",
-                    value = currentWeather.value.time
+                    value = currentWeatherLoadState.value.check(
+                        successContent = currentWeather.value.time,
+                        elseContent = ""
+                    )!!
                 )
                 Spacer(modifier = Modifier.height(spacerHeight))
                 AboutCityItemView(
                     title = "Longitude",
-                    value = currentWeather.value.location.lon
+                    value = currentWeatherLoadState.value.check(
+                        successContent = currentWeather.value.location.lon,
+                        elseContent = ""
+                    )!!
                 )
             }
 
@@ -586,11 +684,15 @@ fun AboutCityPageView(
                 containerColor = TransparentOrange,
                 contentColor = Orange,
                 disabledContainerColor = TransparentBlack,
-                disabledContentColor = Orange
+                disabledContentColor = TransparentOrange
             ),
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            enabled = currentWeatherLoadState.value.check(
+                successContent = true,
+                elseContent = false
+            )!!
         ) {
             Text(
                 text =
@@ -646,8 +748,20 @@ private fun CurrentWeatherPageView(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = currentWeather.value.cityName,
-            color = White,
+            text = currentWeatherLoadState.value.check(
+                successContent = currentWeather.value.cityName,
+                loadingContent = "Transparent Text",
+                emptyContent = "Not Found!",
+                errorContent = "Connection Lost!",
+                elseContent = null
+            )!!,
+            color = currentWeatherLoadState.value.check(
+                successContent = White,
+                loadingContent = Transparent,
+                emptyContent = TransparentWhite,
+                errorContent = Red,
+                elseContent = null
+            )!!,
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             overflow = TextOverflow.Ellipsis,
@@ -656,12 +770,17 @@ private fun CurrentWeatherPageView(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text =
-            if (clickedForecastItem.value == null)
-                currentWeather.value.description
-            else
-                forecastWeather.value[clickedForecastItem.value!!].description,
-            color = TransparentWhite,
+            text = currentWeatherLoadState.value.check(
+                successContent = if (clickedForecastItem.value == null)
+                    currentWeather.value.description
+                else
+                    forecastWeather.value[clickedForecastItem.value!!].description,
+                elseContent = "Transparent Text"
+            )!!,
+            color = currentWeatherLoadState.value.check(
+                successContent = TransparentWhite,
+                elseContent = Transparent
+            )!!,
             fontSize = 24.sp,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
@@ -675,12 +794,14 @@ private fun CurrentWeatherPageView(
                     modifier = Modifier.size(100.dp)
                 )
 
-            LoadState.ERROR ->
+            LoadState.ERROR, LoadState.EMPTY ->
                 Icon(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = "Weather Icon",
                     tint = Red,
-                    modifier = Modifier.size(100.dp)
+                    modifier = Modifier
+                        .size(100.dp)
+                        .shimmer()
                 )
 
             else ->
@@ -695,18 +816,28 @@ private fun CurrentWeatherPageView(
                 )
         }
         Text(
-            text =
-            if (clickedForecastItem.value == null)
-                currentWeather.value.temp
-            else
-                forecastWeather.value[clickedForecastItem.value!!].temp,
-            color = White,
+            text = currentWeatherLoadState.value.check(
+                successContent = if (clickedForecastItem.value == null)
+                    currentWeather.value.temp
+                else
+                    forecastWeather.value[clickedForecastItem.value!!].temp,
+                elseContent = "Transparent Text"
+            )!!,
+            color = currentWeatherLoadState.value.check(
+                successContent = White,
+                elseContent = Transparent
+            )!!,
             fontSize = 48.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = currentWeatherLoadState.value.check(
+                successContent = Modifier,
+                loadingContent = Modifier.shimmer(),
+                elseContent = Modifier.alpha(0.5f)
+            )!!
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -717,12 +848,18 @@ private fun CurrentWeatherPageView(
                     fontSize = 16.sp,
                 )
                 Text(
-                    text =
-                    if (clickedForecastItem.value == null)
-                        currentWeather.value.maxTemp
-                    else
-                        forecastWeather.value[clickedForecastItem.value!!].maxTemp,
-                    color = White,
+                    text = currentWeatherLoadState.value.check(
+                        successContent =
+                        if (clickedForecastItem.value == null)
+                            currentWeather.value.maxTemp
+                        else
+                            forecastWeather.value[clickedForecastItem.value!!].maxTemp,
+                        elseContent = "Text"
+                    )!!,
+                    color = currentWeatherLoadState.value.check(
+                        successContent = White,
+                        elseContent = Transparent
+                    )!!,
                     fontSize = 16.sp,
                 )
             }
@@ -734,7 +871,7 @@ private fun CurrentWeatherPageView(
                     .background(color = TransparentWhite)
             )
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     text = "min",
@@ -742,12 +879,17 @@ private fun CurrentWeatherPageView(
                     fontSize = 16.sp,
                 )
                 Text(
-                    text =
-                    if (clickedForecastItem.value == null)
-                        currentWeather.value.minTemp
-                    else
-                        forecastWeather.value[clickedForecastItem.value!!].minTemp,
-                    color = White,
+                    text = currentWeatherLoadState.value.check(
+                        successContent = if (clickedForecastItem.value == null)
+                            currentWeather.value.minTemp
+                        else
+                            forecastWeather.value[clickedForecastItem.value!!].minTemp,
+                        elseContent = "Text"
+                    )!!,
+                    color = currentWeatherLoadState.value.check(
+                        successContent = White,
+                        elseContent = Transparent
+                    )!!,
                     fontSize = 16.sp,
                 )
             }
