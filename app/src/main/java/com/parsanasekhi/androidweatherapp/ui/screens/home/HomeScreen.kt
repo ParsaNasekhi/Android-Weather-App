@@ -71,6 +71,7 @@ import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
 import com.parsanasekhi.androidweatherapp.utills.LoadState
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
 import com.parsanasekhi.androidweatherapp.utills.removeCityEvent
+import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 
 @Composable

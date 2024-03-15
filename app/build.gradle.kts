@@ -93,4 +93,7 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
 
+    // shimmer:
+    implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
+
 }

@@ -1,6 +1,9 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.bookmark
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -33,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +45,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,8 +65,14 @@ import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
 import com.parsanasekhi.androidweatherapp.utills.BottomAppBarHeight
+import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
+import com.parsanasekhi.androidweatherapp.utills.LoadState
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
 import com.parsanasekhi.androidweatherapp.utills.removeCityEvent
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.ShimmerTheme
+import com.valentinilk.shimmer.rememberShimmer
+import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -77,6 +88,7 @@ fun BookmarkScreen(
     }
 
     val citiesWeather = bookmarkViewModel.citiesWeather
+    val citiesWeatherLoadState = bookmarkViewModel.citiesWeatherLoadState.collectAsState()
 
     val scope = rememberCoroutineScope()
     val dialogState = remember {
@@ -84,6 +96,33 @@ fun BookmarkScreen(
     }
 
     var cityToDelete: City? = null
+
+    val customShimmer = rememberShimmer(
+        shimmerBounds = ShimmerBounds.Window,
+        theme = ShimmerTheme(
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    800,
+                    easing = LinearEasing,
+                    delayMillis = 1_500,
+                ),
+                repeatMode = RepeatMode.Restart,
+            ),
+            blendMode = BlendMode.DstIn,
+            rotation = 15.0f,
+            shaderColors = listOf(
+                Color.Unspecified.copy(alpha = 0.75f),
+                Color.Unspecified.copy(alpha = 0.00f),
+                Color.Unspecified.copy(alpha = 0.75f),
+            ),
+            shaderColorStops = listOf(
+                0.0f,
+                0.5f,
+                1.0f,
+            ),
+            shimmerWidth = 400.dp,
+        )
+    )
 
     ShowAlertDialog(dialogState) {
         bookmarkViewModel.unbookmarkCity(cityToDelete!!)
@@ -96,25 +135,44 @@ fun BookmarkScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        BookmarkedListView(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            citiesWeather,
-            onDelete = { city ->
-                cityToDelete = city
-                dialogState.value = true
-            },
-            onClick = { city ->
-                cityFromBookmarkScreen.value = city
-                scope.launch {
-                    pagerState.animateScrollToPage(
-                        page = 0,
-                        animationSpec = tween(durationMillis = 1000)
-                    )
+        when (citiesWeatherLoadState.value) {
+            LoadState.SUCCESS -> BookmarkedListView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                citiesWeather = citiesWeather,
+                onDelete = { city ->
+                    cityToDelete = city
+                    dialogState.value = true
+                },
+                onClick = { city ->
+                    cityFromBookmarkScreen.value = city
+                    scope.launch {
+                        pagerState.animateScrollToPage(
+                            page = 0,
+                            animationSpec = tween(durationMillis = 1000)
+                        )
+                    }
                 }
+            )
+
+            LoadState.LOADING -> repeat(5) {
+                BookmarkedView(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp, horizontal = 16.dp)
+                        .fillMaxWidth()
+                        .height(90.dp)
+                        .shimmer(customShimmer),
+                    cityWeather = EmptyCurrentWeather,
+                    onDelete = {},
+                    onClick = {}
+                )
             }
-        )
+
+            else -> {
+
+            }
+        }
     }
 }
 
