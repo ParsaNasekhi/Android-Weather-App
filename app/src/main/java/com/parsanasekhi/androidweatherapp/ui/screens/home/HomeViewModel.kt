@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.parsanasekhi.androidweatherapp.data.City
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
 import com.parsanasekhi.androidweatherapp.repository.bookmarked_city.BookmarkedCityRepository
-import com.parsanasekhi.androidweatherapp.repository.geocoding.GeocodingRepository
 import com.parsanasekhi.androidweatherapp.repository.weather.WeatherRepository
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
 import com.parsanasekhi.androidweatherapp.utills.LoadState
@@ -23,8 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
-    private val bookmarkedCityRepository: BookmarkedCityRepository,
-    private val geocodingRepository: GeocodingRepository
+    private val bookmarkedCityRepository: BookmarkedCityRepository
 ) : ViewModel() {
 
     private val _currentWeather = MutableStateFlow(EmptyCurrentWeather)
@@ -72,7 +70,10 @@ class HomeViewModel @Inject constructor(
                 .onStart {
                     _forecastWeatherLoadState.value = LoadState.LOADING
                 }.catch { throwable ->
-                    _forecastWeatherLoadState.value = LoadState.ERROR
+                    if (throwable.message == "Not Found" || throwable.message == "Bad Request")
+                        _forecastWeatherLoadState.value = LoadState.EMPTY
+                    else
+                        _forecastWeatherLoadState.value = LoadState.ERROR
                     Log.w("ManualLog", "getForecastWeather/catch: ${throwable.message}")
                 }.collectLatest { forecastWeather ->
                     _forecastWeather.value = forecastWeather.toList()
@@ -88,7 +89,10 @@ class HomeViewModel @Inject constructor(
                 .onStart {
                     _currentWeatherLoadState.value = LoadState.LOADING
                 }.catch { throwable ->
-                    _currentWeatherLoadState.value = LoadState.ERROR
+                    if (throwable.message == "Not Found" || throwable.message == "Bad Request")
+                        _currentWeatherLoadState.value = LoadState.EMPTY
+                    else
+                        _currentWeatherLoadState.value = LoadState.ERROR
                     Log.w("ManualLog", "getCurrentWeather/catch: ${throwable.message}")
                 }.collectLatest { response ->
                     checkIsCityBookmarked(response.cityId!!)
@@ -105,7 +109,10 @@ class HomeViewModel @Inject constructor(
                 .onStart {
                     _currentWeatherLoadState.value = LoadState.LOADING
                 }.catch { throwable ->
-                    _currentWeatherLoadState.value = LoadState.ERROR
+                    if (throwable.message == "Not Found")
+                        _currentWeatherLoadState.value = LoadState.EMPTY
+                    else
+                        _currentWeatherLoadState.value = LoadState.ERROR
                     Log.w("ManualLog", "getCurrentWeatherByCityId/catch: ${throwable.message}")
                 }.collectLatest { response ->
                     checkIsCityBookmarked(response.cityId!!)

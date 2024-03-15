@@ -54,12 +54,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.bumptech.glide.integration.compose.Placeholder
 import com.parsanasekhi.androidweatherapp.data.City
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.Orange
+import com.parsanasekhi.androidweatherapp.ui.theme.Red
 import com.parsanasekhi.androidweatherapp.ui.theme.Transparent
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentBlack
 import com.parsanasekhi.androidweatherapp.ui.theme.TransparentOrange
@@ -67,11 +67,9 @@ import com.parsanasekhi.androidweatherapp.ui.theme.TransparentWhite
 import com.parsanasekhi.androidweatherapp.ui.theme.White
 import com.parsanasekhi.androidweatherapp.ui.widgets.LoadingCircleView
 import com.parsanasekhi.androidweatherapp.utills.BottomAppBarHeight
-import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
 import com.parsanasekhi.androidweatherapp.utills.LoadState
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
 import com.parsanasekhi.androidweatherapp.utills.removeCityEvent
-import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 
 @Composable
@@ -104,7 +102,8 @@ fun HomeScreen(
     if (removeCityEvent.value) {
         removeCityEvent.value = false
         coroutineScope.launch {
-            homeViewModel.checkIsCityBookmarked(currentWeather.value.cityId!!)
+            if (currentWeather.value.cityId != null)
+                homeViewModel.checkIsCityBookmarked(currentWeather.value.cityId!!)
         }
     }
 
@@ -307,51 +306,43 @@ private fun ForecastWeatherListView(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
             item {
-                if (currentWeather.value != EmptyCurrentWeather)
-                    Column(
-                        modifier = Modifier
-                            .clickable {
-                                onItemClicked(null)
-                            }
-                            .background(color = if (clickedForecastItem.value == null) TransparentOrange else Transparent)
-                            .padding(horizontal = 8.dp, vertical = 8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Today",
-                            color = White,
-                            fontSize = 12.sp,
+                Column(
+                    modifier = Modifier
+                        .clickable {
+                            onItemClicked(null)
+                        }
+                        .background(color = if (clickedForecastItem.value == null) TransparentOrange else Transparent)
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Today",
+                        color = White,
+                        fontSize = 12.sp,
+                    )
+                    Text(
+                        text = "Right Now",
+                        color = TransparentWhite,
+                        fontSize = 12.sp,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    if (currentWeatherLoadState.value == LoadState.LOADING)
+                        LoadingCircleView(
+                            display = true,
+                            modifier = Modifier.size(48.dp)
                         )
-                        Text(
-                            text = "Right Now",
-                            color = TransparentWhite,
-                            fontSize = 12.sp,
+                    else
+                        GlideImage(
+                            model = currentWeather.value.icon,
+                            contentDescription = "Forecast Weather Icon",
+                            modifier = Modifier.size(48.dp),
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        if (currentWeatherLoadState.value == LoadState.SUCCESS)
-                            GlideImage(
-                                model = currentWeather.value.icon,
-                                contentDescription = "Forecast Weather Icon",
-                                modifier = Modifier.size(48.dp),
-                            )
-                        else if (forecastWeatherLoadState.value == LoadState.EMPTY || forecastWeatherLoadState.value == LoadState.ERROR)
-                            Icon(
-                                imageVector = Icons.Outlined.Info,
-                                contentDescription = "Weather Icon",
-                                tint = White,
-                                modifier = Modifier.size(48.dp)
-                            )
-                        else
-                            LoadingCircleView(
-                                display = true,
-                                modifier = Modifier.size(48.dp)
-                            )
-                        Text(
-                            text = currentWeather.value.temp,
-                            color = White,
-                            fontSize = 16.sp,
-                        )
-                    }
+                    Text(
+                        text = currentWeather.value.temp,
+                        color = White,
+                        fontSize = 16.sp,
+                    )
+                }
             }
             items(forecastWeather.value.size) { dayNum ->
                 ForecastWeatherItemView(
@@ -359,7 +350,7 @@ private fun ForecastWeatherListView(
                     clickedForecastItem = clickedForecastItem,
                     forecastWeather = forecastWeather,
                     onItemClicked = onItemClicked,
-                    forecastWeatherLoadState
+                    forecastWeatherLoadState = forecastWeatherLoadState
                 )
             }
         }
@@ -392,34 +383,35 @@ fun ForecastWeatherItemView(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].date else "",
+            text =
+            if (forecastWeather.value.isNotEmpty())
+                forecastWeather.value[dayNum].date
+            else "",
             color = White,
             fontSize = 12.sp,
         )
         Text(
-            text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].time else "",
+            text =
+            if (forecastWeather.value.isNotEmpty())
+                forecastWeather.value[dayNum].time
+            else "",
             color = TransparentWhite,
             fontSize = 12.sp,
         )
         Spacer(modifier = Modifier.height(4.dp))
         when (forecastWeatherLoadState.value) {
-            LoadState.SUCCESS -> GlideImage(
-                model = forecastWeather.value[dayNum].icon,
-                contentDescription = "Forecast Weather Icon",
-                modifier = Modifier.size(48.dp),
-            )
+            LoadState.LOADING ->
+                LoadingCircleView(
+                    display = true,
+                    modifier = Modifier.size(48.dp)
+                )
 
-            LoadState.EMPTY, LoadState.ERROR -> Icon(
-                imageVector = Icons.Outlined.Info,
-                contentDescription = "Weather Icon",
-                tint = White,
-                modifier = Modifier.size(48.dp)
-            )
-
-            else -> LoadingCircleView(
-                display = true,
-                modifier = Modifier.size(48.dp)
-            )
+            else ->
+                GlideImage(
+                    model = forecastWeather.value[dayNum].icon,
+                    contentDescription = "Forecast Weather Icon",
+                    modifier = Modifier.size(48.dp),
+                )
         }
         Text(
             text = if (forecastWeather.value.isNotEmpty()) forecastWeather.value[dayNum].temp else "",
@@ -441,7 +433,9 @@ private fun HomePagerView(
     onBookmark: (City) -> Unit
 ) {
 
-    val pagerState = rememberPagerState { 2 }
+    val pagerState = rememberPagerState {
+        2
+    }
 
     Column(
         modifier = modifier,
@@ -461,7 +455,7 @@ private fun HomePagerView(
                     currentWeather = currentWeather,
                     forecastWeather = forecastWeather,
                     clickedForecastItem = clickedForecastItem,
-                    currentWeatherLoadState
+                    currentWeatherLoadState = currentWeatherLoadState
                 )
             else
                 AboutCityPageView(
@@ -675,27 +669,30 @@ private fun CurrentWeatherPageView(
         )
         Spacer(modifier = Modifier.height(14.dp))
         when (currentWeatherLoadState.value) {
-            LoadState.SUCCESS -> GlideImage(
-                model =
-                if (clickedForecastItem.value == null)
-                    currentWeather.value.icon
-                else
-                    forecastWeather.value[clickedForecastItem.value!!].icon,
-                contentDescription = "Current Weather Icon",
-                modifier = Modifier.size(100.dp),
-            )
+            LoadState.LOADING ->
+                LoadingCircleView(
+                    display = true,
+                    modifier = Modifier.size(100.dp)
+                )
 
-            LoadState.EMPTY, LoadState.ERROR -> Icon(
-                imageVector = Icons.Outlined.Info,
-                contentDescription = "Weather Icon",
-                tint = TransparentWhite,
-                modifier = Modifier.size(100.dp)
-            )
+            LoadState.ERROR ->
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "Weather Icon",
+                    tint = Red,
+                    modifier = Modifier.size(100.dp)
+                )
 
-            else -> LoadingCircleView(
-                display = true,
-                modifier = Modifier.size(100.dp)
-            )
+            else ->
+                GlideImage(
+                    model =
+                    if (clickedForecastItem.value == null)
+                        currentWeather.value.icon
+                    else
+                        forecastWeather.value[clickedForecastItem.value!!].icon,
+                    contentDescription = "Current Weather Icon",
+                    modifier = Modifier.size(100.dp),
+                )
         }
         Text(
             text =
