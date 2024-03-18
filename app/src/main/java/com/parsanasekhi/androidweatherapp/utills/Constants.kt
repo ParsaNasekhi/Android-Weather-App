@@ -21,3 +21,9 @@ enum class LoadState {
     ERROR,
     EMPTY
 }
+
+sealed class LoadResponse {
+    data object Loading: LoadResponse()
+    data class Failed(val message: String? = null) : LoadResponse()
+    data class Success<T>(val data: T? = null): LoadResponse()
+}

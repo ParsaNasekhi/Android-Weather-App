@@ -65,38 +65,46 @@ class HomeViewModel @Inject constructor(
 
     fun getForecastWeather(cityName: String, daysCount: String) {
         viewModelScope.launch {
-            weatherRepository.getForecastWeather(cityName, daysCount)
-                .onStart {
-                    _forecastWeatherLoadState.value = LoadState.LOADING
-                }.catch { throwable ->
-                    if (throwable.message == "Not Found" || throwable.message == "Bad Request")
-                        _forecastWeatherLoadState.value = LoadState.EMPTY
-                    else
-                        _forecastWeatherLoadState.value = LoadState.ERROR
-                    Log.w("ManualLog", "getForecastWeather/catch: ${throwable.message}")
-                }.collectLatest { forecastWeather ->
-                    _forecastWeather.value = forecastWeather.toList()
-                    _forecastWeatherLoadState.value = LoadState.SUCCESS
-                }
+            try {
+                weatherRepository.getForecastWeather(cityName, daysCount)
+                    .onStart {
+                        _forecastWeatherLoadState.value = LoadState.LOADING
+                    }.catch { throwable ->
+                        if (throwable.message == "Not Found" || throwable.message == "Bad Request" || throwable.message == null)
+                            _forecastWeatherLoadState.value = LoadState.EMPTY
+                        Log.i("ManualLog", "getForecastWeather/flowCatch: ${throwable.message}")
+                    }.collectLatest { forecastWeather ->
+                        Log.i("TestLog", "getForecastWeather: ${forecastWeather[0]}")
+                        _forecastWeather.value = forecastWeather.toList()
+                        _forecastWeatherLoadState.value = LoadState.SUCCESS
+                    }
+            } catch (e: Exception) {
+                Log.w("ManualLog", "getForecastWeather/flow: ${e.message}")
+                _currentWeatherLoadState.value = LoadState.ERROR
+            }
         }
     }
 
     fun getCurrentWeather(cityName: String) {
         viewModelScope.launch {
-            weatherRepository.getCurrentWeather(cityName = cityName)
-                .onStart {
-                    _currentWeatherLoadState.value = LoadState.LOADING
-                }.catch { throwable ->
-                    if (throwable.message == "Not Found" || throwable.message == "Bad Request")
-                        _currentWeatherLoadState.value = LoadState.EMPTY
-                    else
-                        _currentWeatherLoadState.value = LoadState.ERROR
-                    Log.w("ManualLog", "getCurrentWeather/catch: ${throwable.message}")
-                }.collectLatest { response ->
-                    checkIsCityBookmarked(response.cityId!!)
-                    _currentWeather.value = response
-                    _currentWeatherLoadState.value = LoadState.SUCCESS
-                }
+            try {
+                weatherRepository.getCurrentWeather(cityName = cityName)
+                    .onStart {
+                        _currentWeatherLoadState.value = LoadState.LOADING
+                    }.catch { throwable ->
+                        if (throwable.message == "Not Found" || throwable.message == "Bad Request" || throwable.message == null)
+                            _currentWeatherLoadState.value = LoadState.EMPTY
+                        Log.i("ManualLog", "getCurrentWeather/flowCatch: ${throwable.message}")
+                    }.collectLatest { response ->
+                        Log.i("TestLog", "getCurrentWeather: $response")
+                        checkIsCityBookmarked(response.cityId!!)
+                        _currentWeather.value = response
+                        _currentWeatherLoadState.value = LoadState.SUCCESS
+                    }
+            } catch (e: Exception) {
+                _currentWeatherLoadState.value = LoadState.ERROR
+                Log.w("ManualTag", "getCurrentWeather/catch: ${e.message}")
+            }
         }
     }
 

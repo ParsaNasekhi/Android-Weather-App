@@ -121,12 +121,13 @@ fun HomeScreen(
             SearchCityView(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp), text = cityName
+                    .padding(horizontal = 16.dp),
+                text = cityName
             ) { newText ->
                 clickedForecastItem.value = null
-                cityName.value = newText
                 homeViewModel.getCurrentWeather(newText)
                 homeViewModel.getForecastWeather(newText, "5")
+                cityName.value = newText
             }
             Spacer(modifier = Modifier.height(16.dp))
             HomePagerView(
