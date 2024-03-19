@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,15 +21,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -46,6 +50,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -88,9 +94,6 @@ fun HomeScreen(
 
     val isCityBookmarked = homeViewModel.isCityBookmarked.collectAsState()
 
-    val cityName = remember {
-        mutableStateOf("")
-    }
     val clickedForecastItem = remember {
         mutableStateOf<Int?>(null)
     }
@@ -122,12 +125,10 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                text = cityName
             ) { newText ->
                 clickedForecastItem.value = null
                 homeViewModel.getCurrentWeather(newText)
                 homeViewModel.getForecastWeather(newText, "5")
-                cityName.value = newText
             }
             Spacer(modifier = Modifier.height(16.dp))
             HomePagerView(
@@ -166,13 +167,19 @@ fun HomeScreen(
 
 @Composable
 private fun SearchCityView(
-    modifier: Modifier = Modifier, text: State<String>, onSearch: (String) -> Unit
+    modifier: Modifier = Modifier,
+    onSearch: (String) -> Unit
 ) {
+
+    val text = remember {
+        mutableStateOf("")
+    }
+
     OutlinedTextField(
         modifier = modifier,
         value = text.value,
         onValueChange = { newValue ->
-            onSearch(newValue)
+            text.value = newValue
         },
         label = {
             Text(
@@ -186,6 +193,21 @@ private fun SearchCityView(
             disabledBorderColor = TransparentWhite,
             disabledTextColor = TransparentWhite
         ),
+        trailingIcon = {
+            IconButton(onClick = {
+                onSearch(text.value)
+            }) {
+                Image(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = "Search Icon",
+                    modifier = Modifier
+                        .height(30.dp)
+                        .wrapContentWidth(),
+                    colorFilter = ColorFilter.tint(White),
+                    contentScale = ContentScale.FillHeight
+                )
+            }
+        }
     )
 }
 

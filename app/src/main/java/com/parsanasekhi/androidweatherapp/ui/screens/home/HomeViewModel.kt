@@ -65,46 +65,39 @@ class HomeViewModel @Inject constructor(
 
     fun getForecastWeather(cityName: String, daysCount: String) {
         viewModelScope.launch {
-            try {
-                weatherRepository.getForecastWeather(cityName, daysCount)
-                    .onStart {
-                        _forecastWeatherLoadState.value = LoadState.LOADING
-                    }.catch { throwable ->
-                        if (throwable.message == "Not Found" || throwable.message == "Bad Request" || throwable.message == null)
-                            _forecastWeatherLoadState.value = LoadState.EMPTY
-                        Log.i("ManualLog", "getForecastWeather/flowCatch: ${throwable.message}")
-                    }.collectLatest { forecastWeather ->
-                        Log.i("TestLog", "getForecastWeather: ${forecastWeather[0]}")
-                        _forecastWeather.value = forecastWeather.toList()
-                        _forecastWeatherLoadState.value = LoadState.SUCCESS
-                    }
-            } catch (e: Exception) {
-                Log.w("ManualLog", "getForecastWeather/flow: ${e.message}")
-                _currentWeatherLoadState.value = LoadState.ERROR
-            }
+            weatherRepository.getForecastWeather(cityName, daysCount)
+                .onStart {
+                    _forecastWeatherLoadState.value = LoadState.LOADING
+                }.catch { throwable ->
+                    if (throwable.message == "Not Found" || throwable.message == "Bad Request" || throwable.message == null)
+                        _forecastWeatherLoadState.value = LoadState.EMPTY
+                    else
+                        _currentWeatherLoadState.value = LoadState.ERROR
+                    Log.i("ManualLog", "getForecastWeather/catch: ${throwable.message}")
+                }.collect { forecastWeather ->
+                    _forecastWeather.value = forecastWeather.toList()
+                    _forecastWeatherLoadState.value = LoadState.SUCCESS
+                }
+
         }
     }
 
     fun getCurrentWeather(cityName: String) {
         viewModelScope.launch {
-            try {
-                weatherRepository.getCurrentWeather(cityName = cityName)
-                    .onStart {
-                        _currentWeatherLoadState.value = LoadState.LOADING
-                    }.catch { throwable ->
-                        if (throwable.message == "Not Found" || throwable.message == "Bad Request" || throwable.message == null)
-                            _currentWeatherLoadState.value = LoadState.EMPTY
-                        Log.i("ManualLog", "getCurrentWeather/flowCatch: ${throwable.message}")
-                    }.collectLatest { response ->
-                        Log.i("TestLog", "getCurrentWeather: $response")
-                        checkIsCityBookmarked(response.cityId!!)
-                        _currentWeather.value = response
-                        _currentWeatherLoadState.value = LoadState.SUCCESS
-                    }
-            } catch (e: Exception) {
-                _currentWeatherLoadState.value = LoadState.ERROR
-                Log.w("ManualTag", "getCurrentWeather/catch: ${e.message}")
-            }
+            weatherRepository.getCurrentWeather(cityName = cityName)
+                .onStart {
+                    _currentWeatherLoadState.value = LoadState.LOADING
+                }.catch { throwable ->
+                    if (throwable.message == "Not Found" || throwable.message == "Bad Request" || throwable.message == null)
+                        _currentWeatherLoadState.value = LoadState.EMPTY
+                    else
+                        _currentWeatherLoadState.value = LoadState.ERROR
+                    Log.i("ManualLog", "getCurrentWeather/catch: ${throwable.message}")
+                }.collect { currentWeather ->
+                    checkIsCityBookmarked(currentWeather.cityId!!)
+                    _currentWeather.value = currentWeather
+                    _currentWeatherLoadState.value = LoadState.SUCCESS
+                }
         }
     }
 

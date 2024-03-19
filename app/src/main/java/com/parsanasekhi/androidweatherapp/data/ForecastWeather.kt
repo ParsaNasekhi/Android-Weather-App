@@ -1,6 +1,8 @@
 package com.parsanasekhi.androidweatherapp.data
 
-class ForecastWeather : ArrayList<ForecastWeather.Detail>() {
+class ForecastWeather(
+    val cityName: String
+) : ArrayList<ForecastWeather.Detail>() {
     open class Detail (
         open val temp: String,
         open val date: String,

@@ -23,6 +23,13 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
         cityName: String
     ): Flow<CurrentWeather> = flow {
         emit(weatherApiService.getCurrentWeather(cityName))
+    }.filter { response ->
+        if (!response.isSuccessful) {
+            throw Exception(response.message())
+        } else if (response.body() == null) {
+            throw Exception("The response body was null!")
+        }
+        response.isSuccessful && response.body() != null
     }.map { response ->
         Log.i("TestLog", "repoC: ${response.body()?.name}")
         CurrentWeather(
@@ -52,9 +59,18 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
         daysCount: String
     ): Flow<ForecastWeather> = flow {
         emit(weatherApiService.getForecastWeather(cityName))
+    }.filter { response ->
+        if (!response.isSuccessful) {
+            throw Exception(response.message())
+        } else if (response.body() == null || response.body()!!.list.isEmpty()) {
+            throw Exception("The response body was null!")
+        }
+        response.isSuccessful && response.body() != null && response.body()!!.list.isNotEmpty()
     }.map { response ->
         Log.i("TestLog", "repoF: ${response.body()?.city?.name}")
-        val forecastWeather = ForecastWeather()
+        val forecastWeather = ForecastWeather(
+            cityName = response.body()!!.city.name
+        )
         response.body()!!.list.forEach {
             forecastWeather.add(
                 ForecastWeather.Detail(
@@ -74,7 +90,7 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
                         response.body()!!.city.sunrise.toString(),
                         "hh:mm a"
                     ),
-                    description = it.weather[0].description
+                    description = it.weather[0].description,
                 )
             )
         }
