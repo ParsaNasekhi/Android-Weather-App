@@ -118,6 +118,7 @@ fun HomeScreen(
         mutableStateOf(context.getSystemService(Context.LOCATION_SERVICE) as LocationManager)
     }
 
+
     if (cityFromBookmarkScreen.value != null) {
         homeViewModel.getWeatherByCityId(cityFromBookmarkScreen.value!!.id)
         cityFromBookmarkScreen.value = null
@@ -223,7 +224,8 @@ private fun SearchCityView(
         },
         label = {
             Text(
-                text = "Enter a city name", color = TransparentWhite
+                text = "Enter a city name",
+                color = TransparentWhite
             )
         },
         maxLines = 1,
@@ -351,7 +353,9 @@ private fun MoreInfoView(
 
 @Composable
 private fun MoreInfoItem(
-    title: String, value: String, modifier: Modifier = Modifier
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
@@ -408,7 +412,11 @@ private fun ForecastWeatherListView(
                         .clickable {
                             onItemClicked(null)
                         }
-                        .background(color = if (clickedForecastItem.value == null) TransparentOrange else Transparent)
+                        .background(
+                            color =
+                            if (clickedForecastItem.value == null) TransparentOrange
+                            else Transparent
+                        )
                         .padding(horizontal = 8.dp, vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -579,9 +587,7 @@ private fun HomePagerView(
     onBookmark: (City) -> Unit
 ) {
 
-    val pagerState = rememberPagerState {
-        2
-    }
+    val pagerState = rememberPagerState { 2 }
 
     Column(
         modifier = modifier,
@@ -982,12 +988,11 @@ private fun CurrentWeatherPageView(
 @Composable
 private fun HomeScreenPreview() {
 
-    val pagerState = rememberPagerState {
-        1
-    }
+    val pagerState = rememberPagerState { 1 }
 
     Surface(
-        modifier = Modifier.fillMaxSize(), color = Color.Gray
+        modifier = Modifier.fillMaxSize(),
+        color = Color.Gray
     ) {
         MainScreen(pagerState) {
             HomeScreen()
