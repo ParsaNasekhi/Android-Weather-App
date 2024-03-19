@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.parsanasekhi.androidweatherapp.data.City
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
+import com.parsanasekhi.androidweatherapp.data.Location
 import com.parsanasekhi.androidweatherapp.repository.bookmarked_city.BookmarkedCityRepository
 import com.parsanasekhi.androidweatherapp.repository.weather.WeatherRepository
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
@@ -104,6 +105,26 @@ class HomeViewModel @Inject constructor(
     fun getWeatherByCityId(cityId: Int) {
         viewModelScope.launch {
             weatherRepository.getCityWeatherById(cityId)
+                .onStart {
+                    _currentWeatherLoadState.value = LoadState.LOADING
+                }.catch { throwable ->
+                    if (throwable.message == "Not Found")
+                        _currentWeatherLoadState.value = LoadState.EMPTY
+                    else
+                        _currentWeatherLoadState.value = LoadState.ERROR
+                    Log.w("ManualLog", "getCurrentWeatherByCityId/catch: ${throwable.message}")
+                }.collectLatest { response ->
+                    checkIsCityBookmarked(response.cityId!!)
+                    getForecastWeather(response.cityName, "5")
+                    _currentWeather.value = response
+                    _currentWeatherLoadState.value = LoadState.SUCCESS
+                }
+        }
+    }
+
+    fun getWeatherByCityLocation(location: Location) {
+        viewModelScope.launch {
+            weatherRepository.getCityWeatherByLocation(location)
                 .onStart {
                     _currentWeatherLoadState.value = LoadState.LOADING
                 }.catch { throwable ->

@@ -1,5 +1,9 @@
 package com.parsanasekhi.androidweatherapp.ui.screens.home
 
+import android.content.Context
+import android.content.Intent
+import android.location.LocationManager
+import android.provider.Settings
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -21,13 +25,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ButtonColors
@@ -42,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -53,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,9 +67,16 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.parsanasekhi.androidweatherapp.config.checkLocationPermission
+import com.parsanasekhi.androidweatherapp.config.currentLatitude
+import com.parsanasekhi.androidweatherapp.config.currentLongitude
+import com.parsanasekhi.androidweatherapp.config.isLocationProviderEnabled
+import com.parsanasekhi.androidweatherapp.config.locationListener
+import com.parsanasekhi.androidweatherapp.config.runLocationListener
 import com.parsanasekhi.androidweatherapp.data.City
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
+import com.parsanasekhi.androidweatherapp.data.Location
 import com.parsanasekhi.androidweatherapp.ui.MainScreen
 import com.parsanasekhi.androidweatherapp.ui.theme.Orange
 import com.parsanasekhi.androidweatherapp.ui.theme.Red
@@ -99,6 +112,11 @@ fun HomeScreen(
     }
 
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val locationManager by remember {
+        mutableStateOf(context.getSystemService(Context.LOCATION_SERVICE) as LocationManager)
+    }
 
     if (cityFromBookmarkScreen.value != null) {
         homeViewModel.getWeatherByCityId(cityFromBookmarkScreen.value!!.id)
@@ -113,6 +131,24 @@ fun HomeScreen(
         }
     }
 
+    if (isLocationProviderEnabled.value != null) {
+        if (!isLocationProviderEnabled.value!!) {
+            val settingsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            context.startActivity(settingsIntent)
+            isLocationProviderEnabled.value = null
+        }
+    }
+
+    if (currentLatitude.value.isNotEmpty() && currentLongitude.value.isNotEmpty()) {
+        homeViewModel.getWeatherByCityLocation(
+            Location(
+                lat = currentLatitude.value,
+                lon = currentLongitude.value
+            )
+        )
+        locationManager.removeUpdates(locationListener)
+    }
+
     LazyColumn(
         modifier = Modifier
             .padding(top = 16.dp)
@@ -125,6 +161,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
+                locationManager = locationManager
             ) { newText ->
                 clickedForecastItem.value = null
                 homeViewModel.getCurrentWeather(newText)
@@ -168,8 +205,11 @@ fun HomeScreen(
 @Composable
 private fun SearchCityView(
     modifier: Modifier = Modifier,
+    locationManager: LocationManager,
     onSearch: (String) -> Unit
 ) {
+
+    val context = LocalContext.current
 
     val text = remember {
         mutableStateOf("")
@@ -194,18 +234,35 @@ private fun SearchCityView(
             disabledTextColor = TransparentWhite
         ),
         trailingIcon = {
-            IconButton(onClick = {
-                onSearch(text.value)
-            }) {
-                Image(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = "Search Icon",
-                    modifier = Modifier
-                        .height(30.dp)
-                        .wrapContentWidth(),
-                    colorFilter = ColorFilter.tint(White),
-                    contentScale = ContentScale.FillHeight
-                )
+            Row {
+                IconButton(
+                    onClick = {
+                        onSearch(text.value)
+                    }
+                ) {
+                    Image(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = "Search Icon",
+                        modifier = Modifier
+                            .size(30.dp),
+                        colorFilter = ColorFilter.tint(White),
+                        contentScale = ContentScale.FillHeight
+                    )
+                }
+                IconButton(onClick = {
+                    checkLocationPermission(context) {
+                        runLocationListener(locationManager)
+                    }
+                }) {
+                    Image(
+                        imageVector = Icons.Filled.LocationOn,
+                        contentDescription = "Location Icon",
+                        modifier = Modifier
+                            .size(30.dp),
+                        colorFilter = ColorFilter.tint(White),
+                        contentScale = ContentScale.FillHeight
+                    )
+                }
             }
         }
     )

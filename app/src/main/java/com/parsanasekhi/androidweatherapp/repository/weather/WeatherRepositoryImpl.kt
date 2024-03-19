@@ -1,6 +1,5 @@
 package com.parsanasekhi.androidweatherapp.repository.weather
 
-import android.util.Log
 import com.parsanasekhi.androidweatherapp.data.CurrentWeather
 import com.parsanasekhi.androidweatherapp.data.ForecastWeather
 import com.parsanasekhi.androidweatherapp.data.Location
@@ -31,7 +30,6 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
         }
         response.isSuccessful && response.body() != null
     }.map { response ->
-        Log.i("TestLog", "repoC: ${response.body()?.name}")
         CurrentWeather(
             cityName = response.body()!!.name,
             location = Location(
@@ -67,7 +65,6 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
         }
         response.isSuccessful && response.body() != null && response.body()!!.list.isNotEmpty()
     }.map { response ->
-        Log.i("TestLog", "repoF: ${response.body()?.city?.name}")
         val forecastWeather = ForecastWeather(
             cityName = response.body()!!.city.name
         )
@@ -128,4 +125,40 @@ class WeatherRepositoryImpl @Inject constructor(private val weatherApiService: W
             cityId = response.body()!!.id
         )
     }.flowOn(Dispatchers.IO)
+
+    override suspend fun getCityWeatherByLocation(location: Location) = flow {
+        emit(weatherApiService.getCityWeatherByLocation(
+            lat = location.lat,
+            lon = location.lon
+        ))
+    }.filter { response ->
+        if (!response.isSuccessful) {
+            throw Exception(response.message())
+        } else if (response.body() == null) {
+            throw Exception("The response body was null!")
+        }
+        response.isSuccessful && response.body() != null
+    }.map { response ->
+        CurrentWeather(
+            cityName = response.body()!!.name,
+            location = Location(
+                lat = response.body()!!.coord.lat.toString(),
+                lon = response.body()!!.coord.lon.toString()
+            ),
+            icon = "${ApiUrl.LoadImageUrl}${response.body()!!.weather[0].icon}.png",
+            description = response.body()!!.weather[0].description,
+            temp = "${(response.body()!!.main.temp - 273.15).roundToInt()}°C",
+            minTemp = "${(response.body()!!.main.tempMin - 273.15).roundToInt()}°C",
+            maxTemp = "${(response.body()!!.main.tempMax - 273.15).roundToInt()}°C",
+            humidity = "${response.body()!!.main.humidity}%",
+            sunset = formatUnixTime(response.body()!!.sys.sunset.toString(), "hh:mm a"),
+            sunrise = formatUnixTime(response.body()!!.sys.sunrise.toString(), "hh:mm a"),
+            windSpeed = "${response.body()!!.wind.speed} m/s",
+            country = response.body()!!.sys.country,
+            date = formatUnixTime(response.body()!!.dt.toString(), "MMM/dd/YYYY"),
+            time = formatUnixTime(response.body()!!.dt.toString(), "hh:mm a"),
+            cityId = response.body()!!.id
+        )
+    }.flowOn(Dispatchers.IO)
+
 }
