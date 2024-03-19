@@ -2,7 +2,6 @@ package com.parsanasekhi.androidweatherapp.di
 
 import com.parsanasekhi.androidweatherapp.db.remote.ApiUrl
 import com.parsanasekhi.androidweatherapp.db.remote.weather.WeatherApiService
-import com.parsanasekhi.androidweatherapp.db.remote.geocoding.GeocodingApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,12 +51,6 @@ object ApiServiceProvider {
     @Singleton
     fun provideWeatherApiService(retrofit: Retrofit): WeatherApiService {
         return retrofit.create(WeatherApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGeocodingApiService(retrofit: Retrofit): GeocodingApiService {
-        return retrofit.create(GeocodingApiService::class.java)
     }
 
 }
