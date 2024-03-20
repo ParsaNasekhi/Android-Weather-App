@@ -118,7 +118,6 @@ fun HomeScreen(
         mutableStateOf(context.getSystemService(Context.LOCATION_SERVICE) as LocationManager)
     }
 
-
     if (cityFromBookmarkScreen.value != null) {
         homeViewModel.getWeatherByCityId(cityFromBookmarkScreen.value!!.id)
         cityFromBookmarkScreen.value = null
@@ -147,6 +146,8 @@ fun HomeScreen(
                 lon = currentLongitude.value
             )
         )
+        currentLatitude.value = ""
+        currentLongitude.value = ""
         locationManager.removeUpdates(locationListener)
     }
 
