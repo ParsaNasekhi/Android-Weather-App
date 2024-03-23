@@ -69,6 +69,7 @@ import com.parsanasekhi.androidweatherapp.utills.BottomAppBarHeight
 import com.parsanasekhi.androidweatherapp.utills.EmptyCurrentWeather
 import com.parsanasekhi.androidweatherapp.utills.LoadState
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
+import com.parsanasekhi.androidweatherapp.utills.needToUpdateBookmarkScreen
 import com.parsanasekhi.androidweatherapp.utills.removeCityEvent
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.ShimmerTheme
@@ -84,8 +85,9 @@ fun BookmarkScreen(
     bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
 
-    remember {
+    if (needToUpdateBookmarkScreen.value) {
         bookmarkViewModel.getBookmarkedCitiesWeather()
+        needToUpdateBookmarkScreen.value = false
     }
 
     val citiesWeather = bookmarkViewModel.citiesWeather

@@ -13,6 +13,8 @@ val EmptyCurrentWeather =
 
 val cityFromBookmarkScreen = mutableStateOf<City?>(null)
 val removeCityEvent = mutableStateOf(false)
+val needToUpdateBookmarkScreen = mutableStateOf(false)
+
 const val BottomAppBarHeight = 100
 
 enum class LoadState {

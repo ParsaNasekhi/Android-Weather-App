@@ -33,6 +33,10 @@ class BookmarkViewModel @Inject constructor(
     private val _citiesWeatherLoadState = MutableStateFlow(LoadState.LOADING)
     val citiesWeatherLoadState = _citiesWeatherLoadState.asStateFlow()
 
+    init {
+        getBookmarkedCitiesWeather()
+    }
+
     fun unbookmarkCity(city: City) {
         viewModelScope.launch {
             bookmarkedCityRepository.deleteCity(city)

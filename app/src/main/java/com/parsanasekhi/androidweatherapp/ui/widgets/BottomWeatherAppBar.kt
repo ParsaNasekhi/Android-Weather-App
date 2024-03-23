@@ -49,9 +49,11 @@ fun BottomWeatherAppBar(
                     modifier = Modifier
                         .height(30.dp)
                         .wrapContentWidth(),
-                    colorFilter = if (page.intValue == 0) ColorFilter.tint(White) else ColorFilter.tint(
-                        TransparentWhite
-                    ),
+                    colorFilter =
+                    if (page.intValue == 0)
+                        ColorFilter.tint(White)
+                    else
+                        ColorFilter.tint(TransparentWhite),
                     contentScale = ContentScale.FillHeight
                 )
             }
@@ -65,9 +67,10 @@ fun BottomWeatherAppBar(
                         .height(28.dp)
                         .wrapContentWidth(),
                     contentDescription = "Bookmark Icon",
-                    colorFilter = if (page.intValue == 0) ColorFilter.tint(TransparentWhite) else ColorFilter.tint(
-                        White
-                    ),
+                    colorFilter =
+                    if (page.intValue == 0)
+                        ColorFilter.tint(TransparentWhite)
+                    else ColorFilter.tint(White),
                     contentScale = ContentScale.FillHeight
                 )
             }

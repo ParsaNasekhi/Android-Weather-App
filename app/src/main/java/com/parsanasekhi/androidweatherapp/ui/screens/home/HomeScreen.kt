@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
 import android.provider.Settings
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -34,9 +35,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -90,6 +92,7 @@ import com.parsanasekhi.androidweatherapp.utills.BottomAppBarHeight
 import com.parsanasekhi.androidweatherapp.utills.LoadState
 import com.parsanasekhi.androidweatherapp.utills.check
 import com.parsanasekhi.androidweatherapp.utills.cityFromBookmarkScreen
+import com.parsanasekhi.androidweatherapp.utills.needToUpdateBookmarkScreen
 import com.parsanasekhi.androidweatherapp.utills.removeCityEvent
 import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
@@ -182,6 +185,7 @@ fun HomeScreen(
                     homeViewModel.bookmarkCity(city)
                 else
                     homeViewModel.unbookmarkCity(city)
+                needToUpdateBookmarkScreen.value = true
             }
             ForecastWeatherListView(
                 modifier = Modifier.fillMaxWidth(),
@@ -237,11 +241,21 @@ private fun SearchCityView(
             disabledTextColor = TransparentWhite
         ),
         trailingIcon = {
-            Row {
-                IconButton(
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Button(
                     onClick = {
                         onSearch(text.value)
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Transparent,
+                        contentColor = White
+                    ),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.size(38.dp)
                 ) {
                     Image(
                         imageVector = Icons.Filled.Search,
@@ -249,14 +263,23 @@ private fun SearchCityView(
                         modifier = Modifier
                             .size(30.dp),
                         colorFilter = ColorFilter.tint(White),
-                        contentScale = ContentScale.FillHeight
+                        contentScale = ContentScale.FillHeight,
                     )
                 }
-                IconButton(onClick = {
-                    checkLocationPermission(context) {
-                        runLocationListener(locationManager)
-                    }
-                }) {
+                Button(
+                    onClick = {
+                        checkLocationPermission(context) {
+                            runLocationListener(locationManager)
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Transparent,
+                        contentColor = White
+                    ),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.size(38.dp)
+                ) {
                     Image(
                         imageVector = Icons.Filled.LocationOn,
                         contentDescription = "Location Icon",
@@ -266,6 +289,7 @@ private fun SearchCityView(
                         contentScale = ContentScale.FillHeight
                     )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
             }
         }
     )
@@ -599,8 +623,12 @@ private fun HomePagerView(
                 .fillMaxWidth()
                 .height(320.dp),
             state = pagerState
-        ) { page ->
-            if (page == 0)
+        ) { newPage ->
+            Log.i(
+                "TestLog",
+                "HomePagerView: $newPage, ${pagerState.currentPage}, ${pagerState.settledPage}"
+            )
+            if (newPage == 0)
                 CurrentWeatherPageView(
                     modifier = Modifier
                         .fillMaxWidth()
